@@ -7,19 +7,21 @@ import Google from "../../Icon/Google.png";
 import Ticket from "../../Icon/Article Ticket.png";
 import MeageulLogo from "../../Icon/Brand Logo_web ver. (v.1.0) (24.09.22) 1.png";
 
-// 환경 변수에서 BASE_URL을 가져오고, 없으면 동적으로 현재 호스트 사용
-const getBaseURL = () => {
-  const envUrl = import.meta.env.VITE_BASE_URL;
+// 환경 변수에서 API URL을 가져오고, 없으면 동적으로 현재 호스트 사용
+const getAPIURL = () => {
+  const envUrl = import.meta.env.VITE_API_URL;
   // 환경 변수가 있고, placeholder가 아니고, 유효한 URL인 경우에만 사용
   if (
     envUrl &&
     !envUrl.includes("YOUR_SERVER_IP") &&
     envUrl.startsWith("http")
   ) {
-    return envUrl;
+    return envUrl.replace(/\/api$/, ""); // /api 제거 (이미 포함되어 있을 수 있음)
   }
   if (import.meta.env.MODE === "production") {
-    return "";
+    // 프로덕션에서는 환경 변수가 필수
+    console.error("VITE_API_URL 환경 변수가 설정되지 않았습니다.");
+    throw new Error("VITE_API_URL 환경 변수가 필요합니다.");
   }
   // 개발 환경에서는 현재 호스트의 IP 사용 (외부 접속 가능)
   const protocol = window.location.protocol;
@@ -27,7 +29,7 @@ const getBaseURL = () => {
   return `${protocol}//${hostname}:5001`;
 };
 
-const BASE_URL = getBaseURL();
+const API_URL = getAPIURL();
 
 const MainSignup = () => {
   const navigate = useNavigate();
@@ -43,7 +45,7 @@ const MainSignup = () => {
   const handleLogin = () => {
     // 현재 클라이언트 호스트를 쿼리 파라미터로 전달
     const clientHost = `${window.location.protocol}//${window.location.host}`;
-    window.location.href = `${BASE_URL}/api/kakao/?clientHost=${encodeURIComponent(
+    window.location.href = `${API_URL}/api/kakao/?clientHost=${encodeURIComponent(
       clientHost
     )}`;
   };

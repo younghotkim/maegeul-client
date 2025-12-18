@@ -37,27 +37,30 @@ export function AccountPopover({
   const user = useAuthStore((state) => state.user); // Store에서 user 가져오기
   const logout = useAuthStore((state) => state.logout); // Store에서 logout 함수 가져오기
 
-  // 환경 변수에서 BASE_URL을 가져오고, 없으면 동적으로 현재 호스트 사용
-  const getBaseURL = () => {
-    const envUrl = import.meta.env.VITE_BASE_URL;
+  // 환경 변수에서 API URL을 가져오고, 없으면 동적으로 현재 호스트 사용
+  const getAPIURL = () => {
+    const envUrl = import.meta.env.VITE_API_URL;
     // 환경 변수가 있고, placeholder가 아니고, 유효한 URL인 경우에만 사용
     if (
       envUrl &&
       !envUrl.includes("YOUR_SERVER_IP") &&
       envUrl.startsWith("http")
     ) {
-      return envUrl.endsWith("/") ? envUrl + "api/" : envUrl + "/api/";
+      // /api 제거하고 서버 베이스 URL 반환
+      return envUrl.replace(/\/api$/, "");
     }
     if (import.meta.env.MODE === "production") {
-      return "/api/";
+      // 프로덕션에서는 환경 변수가 필수
+      console.error("VITE_API_URL 환경 변수가 설정되지 않았습니다.");
+      throw new Error("VITE_API_URL 환경 변수가 필요합니다.");
     }
     // 개발 환경에서는 현재 호스트의 IP 사용 (외부 접속 가능)
     const protocol = window.location.protocol;
     const hostname = window.location.hostname;
-    return `${protocol}//${hostname}:5001/api/`;
+    return `${protocol}//${hostname}:5001`;
   };
 
-  const BASE_URL = getBaseURL();
+  const API_URL = getAPIURL();
 
   const [openPopover, setOpenPopover] = useState<HTMLButtonElement | null>(
     null
@@ -118,7 +121,7 @@ export function AccountPopover({
             user?.isKakaoUser && user?.profile_picture
               ? user.profile_picture // 카카오 프로필 사진
               : user?.profile_picture
-              ? `${BASE_URL}${user.profile_picture}` // DB에 저장된 경로 사용
+              ? `${API_URL}${user.profile_picture}` // DB에 저장된 경로 사용
               : undefined
           }
           alt={user?.profile_name || "Guest"}

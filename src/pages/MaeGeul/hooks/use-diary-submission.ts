@@ -1,18 +1,20 @@
 import { useState, useEffect } from "react";
 
-// 환경 변수에서 BASE_URL을 가져오고, 없으면 동적으로 현재 호스트 사용
-const getBaseURL = () => {
-  const envUrl = import.meta.env.VITE_BASE_URL;
+// 환경 변수에서 API URL을 가져오고, 없으면 동적으로 현재 호스트 사용
+const getAPIURL = () => {
+  const envUrl = import.meta.env.VITE_API_URL;
   // 환경 변수가 있고, placeholder가 아니고, 유효한 URL인 경우에만 사용
   if (
     envUrl &&
     !envUrl.includes("YOUR_SERVER_IP") &&
     envUrl.startsWith("http")
   ) {
-    return envUrl;
+    return envUrl.replace(/\/api$/, ""); // /api 제거 (이미 포함되어 있을 수 있음)
   }
   if (import.meta.env.MODE === "production") {
-    return "";
+    // 프로덕션에서는 환경 변수가 필수
+    console.error("VITE_API_URL 환경 변수가 설정되지 않았습니다.");
+    throw new Error("VITE_API_URL 환경 변수가 필요합니다.");
   }
   // 개발 환경에서는 현재 호스트의 IP 사용 (외부 접속 가능)
   const protocol = window.location.protocol;
@@ -20,7 +22,7 @@ const getBaseURL = () => {
   return `${protocol}//${hostname}:5001`;
 };
 
-const BASE_URL = getBaseURL();
+const API_URL = getAPIURL();
 
 interface SaveMoodData {
   user_id?: number;
@@ -71,7 +73,7 @@ export function useDiarySubmission() {
 
   const handleSaveMoodData = async (moodData: SaveMoodData) => {
     try {
-      const response = await fetch(`${BASE_URL}/api/save-moodmeter`, {
+      const response = await fetch(`${API_URL}/api/save-moodmeter`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -94,7 +96,7 @@ export function useDiarySubmission() {
 
   const handleSaveDiary = async (diaryData: SaveDiaryData) => {
     try {
-      const response = await fetch(`${BASE_URL}/api/diary`, {
+      const response = await fetch(`${API_URL}/api/diary`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -123,7 +125,7 @@ export function useDiarySubmission() {
 
       const emotionResultString = sentences.join(" ");
 
-      const response = await fetch(`${BASE_URL}/api/emotion`, {
+      const response = await fetch(`${API_URL}/api/emotion`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

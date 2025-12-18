@@ -2,19 +2,21 @@ import React, { useState } from "react";
 import { useNavigate } from "react-router-dom"; // useNavigate 추가
 import axios from "axios"; // Axios 추가
 
-// 환경 변수에서 BASE_URL을 가져오고, 없으면 동적으로 현재 호스트 사용
-const getBaseURL = () => {
-  const envUrl = import.meta.env.VITE_BASE_URL;
+// 환경 변수에서 API URL을 가져오고, 없으면 동적으로 현재 호스트 사용
+const getAPIURL = () => {
+  const envUrl = import.meta.env.VITE_API_URL;
   // 환경 변수가 있고, placeholder가 아니고, 유효한 URL인 경우에만 사용
   if (
     envUrl &&
     !envUrl.includes("YOUR_SERVER_IP") &&
     envUrl.startsWith("http")
   ) {
-    return envUrl;
+    return envUrl.replace(/\/api$/, ""); // /api 제거 (이미 포함되어 있을 수 있음)
   }
   if (import.meta.env.MODE === "production") {
-    return "";
+    // 프로덕션에서는 환경 변수가 필수
+    console.error("VITE_API_URL 환경 변수가 설정되지 않았습니다.");
+    throw new Error("VITE_API_URL 환경 변수가 필요합니다.");
   }
   // 개발 환경에서는 현재 호스트의 IP 사용 (외부 접속 가능)
   const protocol = window.location.protocol;
@@ -22,7 +24,7 @@ const getBaseURL = () => {
   return `${protocol}//${hostname}:5001`;
 };
 
-const BASE_URL = getBaseURL();
+const API_URL = getAPIURL();
 
 const SignupStep2: React.FC = () => {
   const navigate = useNavigate(); // 회원가입 성공 후 페이지 이동을 위한 useNavigate
@@ -55,7 +57,7 @@ const SignupStep2: React.FC = () => {
   // 이메일 중복 체크 함수
   const checkEmailDuplicate = async (email: string) => {
     try {
-      const response = await axios.post(`${BASE_URL}/api/check-email`, {
+      const response = await axios.post(`${API_URL}/api/check-email`, {
         email,
       });
       if (response.status === 200) {
@@ -152,7 +154,7 @@ const SignupStep2: React.FC = () => {
     formData.append("profile_picture", file);
 
     try {
-      const response = await axios.post(`${BASE_URL}/api/upload`, formData);
+      const response = await axios.post(`${API_URL}/api/upload`, formData);
       setErrorMessage(null); // 성공 시 에러 메시지 초기화
       return response.data.filePath; // 서버에서 반환된 파일 경로
     } catch (error) {
@@ -199,7 +201,7 @@ const SignupStep2: React.FC = () => {
 
       // 서버에 데이터 전송
       const response = await axios.post(
-        `${BASE_URL}/api/register`,
+        `${API_URL}/api/register`,
         formDataToSend,
         {
           headers: {

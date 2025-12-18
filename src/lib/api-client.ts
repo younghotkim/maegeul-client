@@ -12,7 +12,11 @@ const getBaseURL = () => {
     return envUrl;
   }
   if (import.meta.env.MODE === "production") {
-    return "/api";
+    // 프로덕션에서는 환경 변수가 필수
+    console.error("VITE_API_URL 환경 변수가 설정되지 않았습니다.");
+    throw new Error(
+      "VITE_API_URL 환경 변수가 필요합니다. Vercel 환경 변수를 확인하세요."
+    );
   }
   // 개발 환경에서는 현재 호스트의 IP 사용 (외부 접속 가능)
   const protocol = window.location.protocol;
