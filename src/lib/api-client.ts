@@ -1,27 +1,32 @@
 import axios, { AxiosError } from "axios";
 
-// 환경 변수에서 API URL을 가져오고, 없으면 동적으로 현재 호스트 사용
+// 환경 변수에서 API URL을 가져옴
 const getBaseURL = () => {
   const envUrl = import.meta.env.VITE_API_URL;
+
+  // 디버깅: 환경 변수 확인
+  console.log("🔍 API URL 환경 변수 확인:");
+  console.log("  - VITE_API_URL:", envUrl);
+  console.log("  - MODE:", import.meta.env.MODE);
+
   // 환경 변수가 있고, placeholder가 아니고, 유효한 URL인 경우에만 사용
   if (
     envUrl &&
     !envUrl.includes("YOUR_SERVER_IP") &&
     envUrl.startsWith("http")
   ) {
+    console.log("✅ 환경 변수에서 API URL 사용:", envUrl);
     return envUrl;
   }
-  if (import.meta.env.MODE === "production") {
-    // 프로덕션에서는 환경 변수가 필수
-    console.error("VITE_API_URL 환경 변수가 설정되지 않았습니다.");
-    throw new Error(
-      "VITE_API_URL 환경 변수가 필요합니다. Vercel 환경 변수를 확인하세요."
-    );
-  }
-  // 개발 환경에서는 현재 호스트의 IP 사용 (외부 접속 가능)
-  const protocol = window.location.protocol;
-  const hostname = window.location.hostname;
-  return `${protocol}//${hostname}:5001/api`;
+
+  // 환경 변수가 없으면 에러
+  console.error("❌ VITE_API_URL 환경 변수가 설정되지 않았습니다.");
+  console.error("현재 window.location:", window.location.href);
+  console.error("개발 환경에서는 .env 파일에 VITE_API_URL을 설정하세요.");
+  console.error("프로덕션 환경에서는 Vercel 환경 변수를 확인하세요.");
+  throw new Error(
+    "VITE_API_URL 환경 변수가 필요합니다. .env 파일 또는 Vercel 환경 변수를 확인하세요."
+  );
 };
 
 const BASE_URL = getBaseURL();

@@ -37,9 +37,10 @@ export function AccountPopover({
   const user = useAuthStore((state) => state.user); // Store에서 user 가져오기
   const logout = useAuthStore((state) => state.logout); // Store에서 logout 함수 가져오기
 
-  // 환경 변수에서 API URL을 가져오고, 없으면 동적으로 현재 호스트 사용
+  // 환경 변수에서 API URL을 가져옴
   const getAPIURL = () => {
     const envUrl = import.meta.env.VITE_API_URL;
+
     // 환경 변수가 있고, placeholder가 아니고, 유효한 URL인 경우에만 사용
     if (
       envUrl &&
@@ -49,15 +50,14 @@ export function AccountPopover({
       // /api 제거하고 서버 베이스 URL 반환
       return envUrl.replace(/\/api$/, "");
     }
-    if (import.meta.env.MODE === "production") {
-      // 프로덕션에서는 환경 변수가 필수
-      console.error("VITE_API_URL 환경 변수가 설정되지 않았습니다.");
-      throw new Error("VITE_API_URL 환경 변수가 필요합니다.");
-    }
-    // 개발 환경에서는 현재 호스트의 IP 사용 (외부 접속 가능)
-    const protocol = window.location.protocol;
-    const hostname = window.location.hostname;
-    return `${protocol}//${hostname}:5001`;
+
+    // 환경 변수가 없으면 에러
+    console.error("❌ VITE_API_URL 환경 변수가 설정되지 않았습니다.");
+    console.error("개발 환경에서는 .env 파일에 VITE_API_URL을 설정하세요.");
+    console.error("프로덕션 환경에서는 Vercel 환경 변수를 확인하세요.");
+    throw new Error(
+      "VITE_API_URL 환경 변수가 필요합니다. .env 파일 또는 Vercel 환경 변수를 확인하세요."
+    );
   };
 
   const API_URL = getAPIURL();

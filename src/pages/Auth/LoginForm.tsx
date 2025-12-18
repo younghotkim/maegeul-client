@@ -1,32 +1,8 @@
 //src/pages/Auth/LoginForm.tsx
 import React, { useState } from "react";
-import axios from "axios";
 import { Link, useNavigate } from "react-router-dom"; // `useNavigate` 훅을 사용하여 리다이렉트
 import { useAuthStore } from "../../hooks/stores/use-auth-store"; // Store 사용
-
-// 환경 변수에서 API URL을 가져오고, 없으면 동적으로 현재 호스트 사용
-const getAPIURL = () => {
-  const envUrl = import.meta.env.VITE_API_URL;
-  // 환경 변수가 있고, placeholder가 아니고, 유효한 URL인 경우에만 사용
-  if (
-    envUrl &&
-    !envUrl.includes("YOUR_SERVER_IP") &&
-    envUrl.startsWith("http")
-  ) {
-    return envUrl.replace(/\/api$/, ""); // /api 제거 (이미 포함되어 있을 수 있음)
-  }
-  if (import.meta.env.MODE === "production") {
-    // 프로덕션에서는 환경 변수가 필수
-    console.error("VITE_API_URL 환경 변수가 설정되지 않았습니다.");
-    throw new Error("VITE_API_URL 환경 변수가 필요합니다.");
-  }
-  // 개발 환경에서는 현재 호스트의 IP 사용 (외부 접속 가능)
-  const protocol = window.location.protocol;
-  const hostname = window.location.hostname;
-  return `${protocol}//${hostname}:5001`;
-};
-
-const API_URL = getAPIURL();
+import { apiClient } from "../../lib/api-client"; // api-client 사용
 
 const LoginForm = () => {
   const [email, setEmail] = useState("");
@@ -48,8 +24,12 @@ const LoginForm = () => {
     setError(""); // 이전 에러 초기화
 
     try {
-      // 로그인 API 호출
-      const loginResponse = await axios.post(`${API_URL}/api/login`, {
+      // 로그인 API 호출 (api-client 사용)
+      console.log(
+        "🔍 로그인 요청 - apiClient baseURL:",
+        apiClient.defaults.baseURL
+      );
+      const loginResponse = await apiClient.post("/login", {
         email,
         password,
       });
