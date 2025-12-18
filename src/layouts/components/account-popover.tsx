@@ -118,10 +118,24 @@ export function AccountPopover({
       >
         <Avatar
           src={
-            user?.isKakaoUser && user?.profile_picture
-              ? user.profile_picture // 카카오 프로필 사진
-              : user?.profile_picture
-              ? `${API_URL}${user.profile_picture}` // DB에 저장된 경로 사용
+            user?.profile_picture
+              ? (() => {
+                  // Vercel Blob URL 또는 완전한 URL인 경우 그대로 사용
+                  if (
+                    user.profile_picture.startsWith("http://") ||
+                    user.profile_picture.startsWith("https://")
+                  ) {
+                    console.log(
+                      "✅ 프로필 사진 URL (완전한 URL):",
+                      user.profile_picture
+                    );
+                    return user.profile_picture;
+                  }
+                  // 상대 경로인 경우 API_URL 추가
+                  const fullUrl = `${API_URL}${user.profile_picture}`;
+                  console.log("🔧 프로필 사진 URL (상대 경로):", fullUrl);
+                  return fullUrl;
+                })()
               : undefined
           }
           alt={user?.profile_name || "Guest"}
