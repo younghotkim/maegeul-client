@@ -39,11 +39,8 @@ const imageStyle: React.CSSProperties = {
 
 const KakaoLoginButton: React.FC = () => {
   const handleLogin = () => {
-    // 현재 클라이언트 호스트를 쿼리 파라미터로 전달
-    const clientHost = `${window.location.protocol}//${window.location.host}`;
-    window.location.href = `${API_URL}/api/kakao/?clientHost=${encodeURIComponent(
-      clientHost
-    )}`;
+    // 서버의 CLIENT_BASE_URL 환경 변수를 사용하므로 쿼리 파라미터 불필요
+    window.location.href = `${API_URL}/api/kakao`;
   };
 
   return (
