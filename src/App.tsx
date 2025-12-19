@@ -4,10 +4,8 @@ import { QueryClientProvider } from "@tanstack/react-query";
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 import { queryClient } from "./lib/query-client";
 import { useThemeStore } from "./hooks/stores/use-theme-store";
-import { useAuthStore } from "./hooks/stores/use-auth-store";
 import { HelmetProvider } from "react-helmet-async";
 import { DashboardWrapper } from "./layouts/DashboardWrapper";
-import { AuthInitializer } from "./components/AuthInitializer";
 // Context Provider 제거 - Store 사용으로 전환
 
 // Eager loading for critical pages
@@ -56,24 +54,8 @@ function ThemeSync() {
   return null;
 }
 
-// Auth loading component - 인증 초기화 중 표시
-const AuthLoadingFallback = () => (
-  <div className="flex min-h-screen items-center justify-center bg-background">
-    <div className="text-center">
-      <div className="inline-block h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent" />
-      <p className="mt-4 text-sm text-muted-foreground">인증 확인 중...</p>
-    </div>
-  </div>
-);
-
-// App content wrapper - 인증 초기화 완료 후 렌더링
+// App content wrapper
 function AppContent() {
-  const isInitialized = useAuthStore((state) => state.isInitialized);
-
-  if (!isInitialized) {
-    return <AuthLoadingFallback />;
-  }
-
   return (
     <Suspense fallback={<LoadingFallback />}>
       <Routes>
@@ -128,7 +110,6 @@ const App: React.FC = () => {
     <HelmetProvider>
       <QueryClientProvider client={queryClient}>
         <ThemeSync />
-        <AuthInitializer />
         <Router>
           <AppContent />
         </Router>

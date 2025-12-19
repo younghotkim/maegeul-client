@@ -7,7 +7,7 @@ import { AlertCircle } from "lucide-react"
 
 const KakaoCallback = () => {
   const location = useLocation()
-  const { setUser, setToken, setInitialized } = useAuthStore()
+  const { setAuth, logout } = useAuthStore()
   const navigate = useNavigate()
   const [error, setError] = useState<string | null>(null)
 
@@ -20,45 +20,47 @@ const KakaoCallback = () => {
 
       if (errorParam) {
         setError("카카오 로그인에 실패했습니다.")
+        logout()
         setTimeout(() => navigate("/mainlogin"), 2000)
         return
       }
 
       if (!token || !userId) {
         setError("로그인 정보가 없습니다.")
+        logout()
         setTimeout(() => navigate("/mainlogin"), 2000)
         return
       }
 
       try {
-        setToken(token)
-
         const response = await apiClient.get(`/user/${userId}`, {
           headers: { Authorization: `Bearer ${token}` },
         })
 
         const userData = response.data.user || response.data
 
-        setUser({
-          user_id: Number(userId),
-          profile_name: userData.profile_name || "",
-          profile_picture: userData.profile_picture || undefined,
-          email: userData.email || "",
-          isKakaoUser: true,
-        })
-
-        setInitialized(true)
+        // setAuth로 한 번에 설정
+        setAuth(
+          {
+            user_id: Number(userId),
+            profile_name: userData.profile_name || "",
+            profile_picture: userData.profile_picture || undefined,
+            email: userData.email || "",
+            isKakaoUser: true,
+          },
+          token
+        )
         navigate("/")
       } catch (err) {
         console.error("사용자 정보를 가져오는데 실패했습니다:", err)
         setError("사용자 정보를 가져오는데 실패했습니다.")
-        setInitialized(true)
-        setTimeout(() => navigate("/"), 2000)
+        logout()
+        setTimeout(() => navigate("/mainlogin"), 2000)
       }
     }
 
     handleKakaoCallback()
-  }, [location, setUser, setToken, setInitialized, navigate])
+  }, [location, setAuth, logout, navigate])
 
   if (error) {
     return (

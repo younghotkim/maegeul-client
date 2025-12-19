@@ -36,6 +36,7 @@ const MgWriting: React.FC = () => {
   const handleComplete = async () => {
     if (!form.user || !form.isValid) return;
 
+    // 1. 무드 데이터 저장
     await submission.handleSaveMoodData({
       user_id: form.user.user_id,
       pleasantness: form.pleasantness,
@@ -44,6 +45,7 @@ const MgWriting: React.FC = () => {
       color: form.colorName,
     });
 
+    // 2. 일기 저장
     await submission.handleSaveDiary({
       user_id: form.user.user_id,
       title: form.title,
@@ -51,6 +53,7 @@ const MgWriting: React.FC = () => {
       color: form.colorName,
     });
 
+    // 3. 모달 열기 (분석은 선택사항)
     submission.handleModalOpen();
     form.handleClickComplete();
   };
@@ -258,6 +261,7 @@ const MgWriting: React.FC = () => {
         {submission.showModal && (
           <MgModal
             content={form.content}
+            diaryId={submission.diaryId}
             onClose={submission.handleModalClose}
             onAnalyzeComplete={submission.handleAnalyzeComplete}
           />

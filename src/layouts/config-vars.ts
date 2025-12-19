@@ -5,13 +5,13 @@ import { varAlpha } from "../theme/styles";
 // ----------------------------------------------------------------------
 
 export const baseVars = (theme: Theme) => ({
-  // nav
-  "--layout-nav-bg": theme.vars.palette.common.white,
+  // nav - 불투명 배경으로 가시성 개선
+  "--layout-nav-bg": theme.vars.palette.background.paper,
   "--layout-nav-border-color": varAlpha(
     theme.vars.palette.grey["500Channel"],
-    0.08
+    0.2
   ),
-  "--layout-nav-zIndex": 1101,
+  "--layout-nav-zIndex": 1201,
   "--layout-nav-mobile-width": "320px",
   // nav item
   "--layout-nav-item-height": "44px",
@@ -27,7 +27,7 @@ export const baseVars = (theme: Theme) => ({
   ),
   // header
   "--layout-header-blur": "8px",
-  "--layout-header-zIndex": 1100,
+  "--layout-header-zIndex": 1200,
   "--layout-header-mobile-height": "64px",
   "--layout-header-desktop-height": "72px",
 });

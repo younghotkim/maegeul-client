@@ -1,5 +1,5 @@
 import React, { useState, useCallback } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   RefreshCw,
@@ -9,6 +9,8 @@ import {
   X,
   Zap,
   SlidersHorizontal,
+  Loader2,
+  Check,
 } from "lucide-react";
 import MoodSlider from "../../components/MoodSlider";
 import EnergySlider from "../../components/EnergySlider";
@@ -18,14 +20,28 @@ import ProgressBar from "../../components/ProgressBar";
 import { useAuthStore } from "../../hooks/stores/use-auth-store";
 import { useMoodStore } from "../../hooks/stores/use-mood-store";
 
-type DiagMode = "select" | "quick" | "detailed" | "result";
+// API URL 가져오기
+const getAPIURL = () => {
+  const envUrl = import.meta.env.VITE_API_URL;
+  if (envUrl && !envUrl.includes("YOUR_SERVER_IP") && envUrl.startsWith("http")) {
+    return envUrl.replace(/\/api$/, "");
+  }
+  throw new Error("VITE_API_URL 환경 변수가 필요합니다.");
+};
+
+const API_URL = getAPIURL();
+
+type DiagMode = "select" | "quick" | "detailed" | "result" | "quick-complete";
 
 const Diag: React.FC = () => {
   const [mode, setMode] = useState<DiagMode>("select");
   const [moodValue, setMoodValue] = useState<number>(5);
   const [energyValue, setEnergyValue] = useState<number>(5);
   const [showMoodMeter, setShowMoodMeter] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
+  const [isSaved, setIsSaved] = useState(false);
 
+  const navigate = useNavigate();
   const user = useAuthStore((state) => state.user);
 
   const {
@@ -94,7 +110,7 @@ const Diag: React.FC = () => {
     [setHighlightedLabels]
   );
 
-  // 원터치 모드 핸들러
+  // 원터치 모드 핸들러 - 바로 일기 작성으로 이동
   const handleQuickColorSelect = useCallback(
     (color: string, pleasantness: number, energy: number) => {
       setHighlightedColor(color);
@@ -102,7 +118,8 @@ const Diag: React.FC = () => {
       setEnergyValue(energy);
       setPleasantness(pleasantness);
       setEnergy(energy);
-      setMode("result");
+      // 빠른 진단은 결과 화면 건너뛰고 바로 일기 작성으로
+      setMode("quick-complete");
     },
     [setHighlightedColor, setPleasantness, setEnergy]
   );
@@ -253,7 +270,228 @@ const Diag: React.FC = () => {
     );
   }
 
-  // 결과 화면
+  // 빠른 체크인 저장 함수
+  const handleSaveQuickCheckin = async () => {
+    if (!user || isSaving || isSaved) return;
+    
+    setIsSaving(true);
+    try {
+      const colorName = highlightedColor ? getColorName(highlightedColor) : "";
+      const labelText = highlightedLabels.join(", ");
+      
+      // 1. 무드 데이터 저장
+      const moodResponse = await fetch(`${API_URL}/api/save-moodmeter`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          user_id: user.user_id,
+          pleasantness: moodValue,
+          energy: energyValue,
+          label: labelText,
+          color: colorName,
+        }),
+      });
+
+      if (!moodResponse.ok) throw new Error("무드 저장 실패");
+      
+      // 2. 일기 테이블에도 저장 (빠른 체크인 기록용 - 내용 없이 기분만)
+      const diaryResponse = await fetch(`${API_URL}/api/diary`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          user_id: user.user_id,
+          title: `빠른 체크인: ${labelText || colorName}`,
+          content: `#${labelText.split(", ").join(" #")}`, // 태그만 저장
+          color: colorName,
+        }),
+      });
+
+      if (!diaryResponse.ok) {
+        console.warn("일기 저장 실패 (무드는 저장됨)");
+      }
+      
+      setIsSaved(true);
+      // 1.5초 후 대시보드로 이동
+      setTimeout(() => navigate("/dashboard"), 1500);
+    } catch (error) {
+      console.error("빠른 체크인 저장 오류:", error);
+      alert("저장 중 오류가 발생했습니다. 다시 시도해주세요.");
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  // 빠른 체크인 완료 화면 - 감정 기록만 하고 끝
+  if (mode === "quick-complete") {
+    const quickColorName = highlightedColor ? getColorName(highlightedColor) : "";
+    
+    return (
+      <div className="min-h-screen bg-gradient-to-b from-gray-50 to-white dark:from-gray-900 dark:to-gray-800">
+        {/* Progress Bar 섹션 */}
+        <div className="w-full max-w-[1140px] relative pt-10 mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="absolute top-6 left-4 sm:left-6 lg:left-0 z-10 font-bold text-scampi-700 dark:text-scampi-300 text-sm sm:text-base">
+            빠른 체크인 완료
+          </div>
+          <div className="w-full flex justify-center">
+            <ProgressBar value={100} />
+          </div>
+        </div>
+
+        {/* 결과 컨텐츠 */}
+        <motion.div
+          className="w-full max-w-2xl mx-auto px-4 sm:px-6 py-8"
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6 }}
+        >
+          <motion.div
+            className="bg-white dark:bg-gray-800 rounded-3xl shadow-xl p-6 sm:p-8 border border-gray-100 dark:border-gray-700 text-center"
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ delay: 0.2, duration: 0.5 }}
+          >
+            {/* 성공 아이콘 */}
+            <motion.div
+              className="inline-flex items-center justify-center w-24 h-24 rounded-full mb-6"
+              style={{ backgroundColor: `${highlightedColor}20` }}
+              initial={{ scale: 0 }}
+              animate={{ scale: 1 }}
+              transition={{ delay: 0.3, type: "spring" }}
+            >
+              <span className="text-6xl">
+                {highlightedColor === "#EE5D50" && "😤"}
+                {highlightedColor === "#FFDE57" && "😊"}
+                {highlightedColor === "#6AD2FF" && "😔"}
+                {highlightedColor === "#35D28A" && "😌"}
+              </span>
+            </motion.div>
+
+            {/* 결과 텍스트 */}
+            <motion.div
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.4 }}
+            >
+              <p className="text-gray-500 dark:text-gray-400 text-sm mb-2">
+                {isSaved ? "감정이 저장되었어요!" : "오늘의 감정을 확인했어요"}
+              </p>
+              <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white mb-2">
+                <span style={{ color: highlightedColor || "#667eea" }}>
+                  {quickColorName}
+                </span>
+                <span
+                  className="inline-block w-6 h-6 sm:w-8 sm:h-8 rounded-lg shadow-md ml-2 align-middle"
+                  style={{ backgroundColor: highlightedColor || "#667eea" }}
+                />
+              </h2>
+            </motion.div>
+
+            {/* 감정 태그 */}
+            {highlightedLabels.length > 0 && (
+              <motion.div
+                className="flex flex-wrap justify-center gap-2 my-6"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ delay: 0.5 }}
+              >
+                {highlightedLabels.map((label, index) => (
+                  <span
+                    key={index}
+                    className="px-4 py-2 rounded-full text-base font-medium"
+                    style={{
+                      backgroundColor: `${highlightedColor || "#667eea"}20`,
+                      color: highlightedColor || "#667eea",
+                      border: `1px solid ${highlightedColor || "#667eea"}40`,
+                    }}
+                  >
+                    #{label}
+                  </span>
+                ))}
+              </motion.div>
+            )}
+
+            {/* 응원 메시지 */}
+            <motion.p
+              className="text-gray-600 dark:text-gray-300 text-sm sm:text-base mt-4 mb-6"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: 0.6 }}
+            >
+              {highlightedColor === "#EE5D50" && "힘든 감정도 괜찮아요. 잘 버티고 있어요 💪"}
+              {highlightedColor === "#FFDE57" && "오늘 기분이 좋네요! 이 에너지를 즐겨요 ✨"}
+              {highlightedColor === "#6AD2FF" && "쉬어가도 괜찮아요. 천천히 회복해요 🌊"}
+              {highlightedColor === "#35D28A" && "평온한 하루네요. 이 순간을 음미해요 🍃"}
+            </motion.p>
+
+            {/* CTA 버튼들 */}
+            <motion.div
+              className="flex flex-col gap-3 mt-6"
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.7 }}
+            >
+              {/* 메인 CTA - 저장하고 홈으로 */}
+              <button
+                onClick={handleSaveQuickCheckin}
+                disabled={isSaving || isSaved}
+                className="w-full inline-flex items-center justify-center gap-2 px-6 py-3.5 rounded-xl font-bold
+                  text-white shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 transition-all duration-200
+                  disabled:opacity-70 disabled:cursor-not-allowed disabled:transform-none"
+                style={{
+                  background: isSaved 
+                    ? "linear-gradient(135deg, #10b981 0%, #059669 100%)"
+                    : `linear-gradient(135deg, ${highlightedColor || "#8b5cf6"} 0%, ${highlightedColor || "#8b5cf6"}cc 100%)`,
+                }}
+              >
+                {isSaving ? (
+                  <>
+                    <Loader2 className="w-5 h-5 animate-spin" />
+                    저장 중...
+                  </>
+                ) : isSaved ? (
+                  <>
+                    <Check className="w-5 h-5" />
+                    저장 완료!
+                  </>
+                ) : (
+                  <>
+                    <Sparkles className="w-5 h-5" />
+                    체크인 저장하기
+                  </>
+                )}
+              </button>
+
+              {/* 서브 옵션들 */}
+              {!isSaved && (
+                <div className="flex gap-2">
+                  <button
+                    onClick={handleRetry}
+                    disabled={isSaving}
+                    className="flex-1 px-4 py-2.5 rounded-xl font-medium text-gray-600 dark:text-gray-400 
+                      bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors text-sm
+                      disabled:opacity-50"
+                  >
+                    다시 선택
+                  </button>
+
+                  <Link to="/MgWriting" className="flex-1">
+                    <button
+                      className="w-full px-4 py-2.5 rounded-xl font-medium text-violet-600 dark:text-violet-400 
+                        border-2 border-violet-200 dark:border-violet-800 hover:bg-violet-50 dark:hover:bg-violet-900/30 transition-colors text-sm"
+                    >
+                      일기도 쓸래요
+                    </button>
+                  </Link>
+                </div>
+              )}
+            </motion.div>
+          </motion.div>
+        </motion.div>
+      </div>
+    );
+  }
+
+  // 결과 화면 (상세 측정용)
   const colorName = highlightedColor ? getColorName(highlightedColor) : "";
 
   return (

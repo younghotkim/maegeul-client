@@ -1,6 +1,6 @@
 //src/layouts/components/account-popover.tsx
 import type { IconButtonProps } from "@mui/material/IconButton";
-import { useState, useCallback, useEffect } from "react";
+import { useState, useCallback, useMemo } from "react";
 import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
 import Avatar from "@mui/material/Avatar";
@@ -66,7 +66,20 @@ export function AccountPopover({
     null
   );
 
-  const isAuthenticated = useAuthStore((state) => state.isAuthenticated); // Store에서 인증 상태 가져오기
+  // 프로필 사진 URL을 메모이제이션하여 불필요한 재계산 방지
+  const profilePictureUrl = useMemo(() => {
+    if (!user?.profile_picture) return undefined;
+    
+    // 완전한 URL인 경우 그대로 사용
+    if (
+      user.profile_picture.startsWith("http://") ||
+      user.profile_picture.startsWith("https://")
+    ) {
+      return user.profile_picture;
+    }
+    // 상대 경로인 경우 API_URL 추가
+    return `${API_URL}${user.profile_picture}`;
+  }, [user?.profile_picture, API_URL]);
 
   const handleOpenPopover = useCallback(
     (event: React.MouseEvent<HTMLButtonElement>) => {
@@ -117,27 +130,7 @@ export function AccountPopover({
         {...other}
       >
         <Avatar
-          src={
-            user?.profile_picture
-              ? (() => {
-                  // Vercel Blob URL 또는 완전한 URL인 경우 그대로 사용
-                  if (
-                    user.profile_picture.startsWith("http://") ||
-                    user.profile_picture.startsWith("https://")
-                  ) {
-                    console.log(
-                      "✅ 프로필 사진 URL (완전한 URL):",
-                      user.profile_picture
-                    );
-                    return user.profile_picture;
-                  }
-                  // 상대 경로인 경우 API_URL 추가
-                  const fullUrl = `${API_URL}${user.profile_picture}`;
-                  console.log("🔧 프로필 사진 URL (상대 경로):", fullUrl);
-                  return fullUrl;
-                })()
-              : undefined
-          }
+          src={profilePictureUrl}
           alt={user?.profile_name || "Guest"}
           sx={{ width: 1, height: 1 }}
         >

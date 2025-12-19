@@ -184,32 +184,7 @@ const Banner: React.FC<BannerProps> = ({ className }) => {
                 <div className="absolute inset-0 bg-gradient-to-t from-black/20 via-transparent to-transparent" />
               </div>
 
-              {/* 플로팅 카드 */}
-              <motion.div
-                className={cn(
-                  "absolute -bottom-4 -left-4 sm:-bottom-6 sm:-left-6",
-                  "bg-card/95 backdrop-blur-sm",
-                  "rounded-xl sm:rounded-2xl shadow-xl",
-                  "p-3 sm:p-4 border border-border/50"
-                )}
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.8 }}
-              >
-                <div className="flex items-center gap-2 sm:gap-3">
-                  <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-primary/10 flex items-center justify-center">
-                    <Sparkles className="w-5 h-5 sm:w-6 sm:h-6 text-primary" />
-                  </div>
-                  <div>
-                    <p className="text-xs sm:text-sm font-semibold text-foreground">
-                      AI 감정 분석
-                    </p>
-                    <p className="text-xs text-muted-foreground">
-                      맞춤형 피드백 제공
-                    </p>
-                  </div>
-                </div>
-              </motion.div>
+           
             </div>
           </motion.div>
         </div>

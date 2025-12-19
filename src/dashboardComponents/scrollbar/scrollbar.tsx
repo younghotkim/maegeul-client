@@ -12,8 +12,7 @@ import type { ScrollbarProps } from "./types";
 export const Scrollbar = forwardRef<HTMLDivElement, ScrollbarProps>(
   ({ slotProps, children, fillContent, sx, ...other }, ref) => (
     <Box
-      scrollableNodeProps={{ ref }}
-      clickOnTrack={false}
+      ref={ref}
       className={scrollbarClasses.root}
       sx={{
         minWidth: 0,
@@ -22,31 +21,27 @@ export const Scrollbar = forwardRef<HTMLDivElement, ScrollbarProps>(
         display: "flex",
         flexDirection: "column",
         width: "100%",
-        // 모바일에서 스크롤바 너비 조정
-        "& .simplebar-scrollbar": {
+        overflow: "auto",
+        // 스크롤바 스타일링
+        "&::-webkit-scrollbar": {
           width: { xs: "6px", sm: "8px" },
+          height: { xs: "6px", sm: "8px" },
         },
-        "& .simplebar-track": {
-          width: { xs: "6px", sm: "8px" },
+        "&::-webkit-scrollbar-thumb": {
+          backgroundColor: "rgba(0, 0, 0, 0.2)",
+          borderRadius: "4px",
         },
-        "& .simplebar-wrapper": {
-          ...(slotProps?.wrapper as React.CSSProperties),
-          width: "100%",
+        "&::-webkit-scrollbar-track": {
+          backgroundColor: "transparent",
         },
-        "& .simplebar-content-wrapper": {
-          ...(slotProps?.contentWrapper as React.CSSProperties),
-          width: "100%",
-        },
-        "& .simplebar-content": {
-          ...(fillContent && {
+        ...(fillContent && {
+          "& > *": {
             minHeight: 1,
             display: "flex",
             flex: "1 1 auto",
             flexDirection: "column",
-          }),
-          width: "100%",
-          ...slotProps?.content,
-        } as React.CSSProperties,
+          },
+        }),
         ...sx,
       }}
       {...other}

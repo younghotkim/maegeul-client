@@ -25,10 +25,11 @@ export function emptyRows(
 // ----------------------------------------------------------------------
 
 function descendingComparator<T>(a: T, b: T, orderBy: keyof T) {
-  if (a[orderBy] < b[orderBy]) {
+  // 내림차순: b가 크면 양수 반환 (b가 앞으로)
+  if (b[orderBy] < a[orderBy]) {
     return -1;
   }
-  if (a[orderBy] > b[orderBy]) {
+  if (b[orderBy] > a[orderBy]) {
     return 1;
   }
   return 0;

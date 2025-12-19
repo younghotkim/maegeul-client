@@ -1,12 +1,15 @@
-import React from "react"
+import React, { useState } from "react"
 import { Link } from "react-router-dom"
 import { cn } from "@/lib/utils"
 import { Separator } from "@/components/ui/separator"
-import { MapPin, Phone, Mail, Heart } from "lucide-react"
+import { MapPin, Phone, Heart, Sparkles } from "lucide-react"
 import Logo from "../logo/main_logo.png"
 
 const Footer: React.FC = () => {
   const currentYear = new Date().getFullYear()
+  const [showCredits, setShowCredits] = useState(false)
+
+  const developers = ["이승연", "최성환", "김현우", "김영하", "박세양"]
 
   const footerLinks = [
     { label: "서비스 소개", href: "#" },
@@ -80,10 +83,80 @@ const Footer: React.FC = () => {
             <span>© {currentYear} Litme Team. All rights reserved.</span>
             <span className="hidden sm:flex items-center gap-1">
               <span>•</span>
-              <span className="flex items-center gap-1">
-                Made with <Heart className="w-3 h-3 text-red-500 fill-red-500" /> in Seoul
+              {/* 이스터에그: hover/click으로 개발자 크레딧 표시 */}
+              <span 
+                className="relative flex items-center gap-1 cursor-pointer group"
+                onMouseEnter={() => setShowCredits(true)}
+                onMouseLeave={() => setShowCredits(false)}
+                onClick={() => setShowCredits(!showCredits)}
+              >
+                <span className="flex items-center gap-1">
+                  Made with <Heart className="w-3 h-3 text-red-500 fill-red-500 group-hover:animate-pulse" /> in Seoul
+                </span>
+                
+                {/* 크레딧 팝업 */}
+                <div 
+                  className={cn(
+                    "absolute bottom-full left-1/2 -translate-x-1/2 mb-2",
+                    "px-4 py-3 rounded-xl shadow-lg",
+                    "bg-white dark:bg-gray-800 border border-violet-200 dark:border-violet-800",
+                    "transition-all duration-300 ease-out",
+                    showCredits 
+                      ? "opacity-100 translate-y-0 pointer-events-auto" 
+                      : "opacity-0 translate-y-2 pointer-events-none"
+                  )}
+                >
+                  <div className="flex items-center gap-1.5 mb-2 text-violet-600 dark:text-violet-400">
+                    <Sparkles className="w-3.5 h-3.5" />
+                    <span className="text-xs font-semibold whitespace-nowrap">Built by</span>
+                  </div>
+                  <div className="flex flex-wrap justify-center gap-1.5">
+                    {developers.map((name, i) => (
+                      <span 
+                        key={name}
+                        className="px-2 py-0.5 text-xs rounded-full bg-violet-100 dark:bg-violet-900/50 text-violet-700 dark:text-violet-300 whitespace-nowrap"
+                        style={{ animationDelay: `${i * 50}ms` }}
+                      >
+                        {name}
+                      </span>
+                    ))}
+                  </div>
+                  {/* 화살표 */}
+                  <div className="absolute top-full left-1/2 -translate-x-1/2 -mt-px">
+                    <div className="border-8 border-transparent border-t-white dark:border-t-gray-800" />
+                  </div>
+                </div>
               </span>
             </span>
+          </div>
+          
+          {/* 모바일용 이스터에그 */}
+          <div 
+            className="sm:hidden flex items-center justify-center mt-2 cursor-pointer"
+            onClick={() => setShowCredits(!showCredits)}
+          >
+            <span className="flex items-center gap-1 text-xs text-muted-foreground">
+              Made with <Heart className="w-3 h-3 text-red-500 fill-red-500" /> in Seoul
+            </span>
+          </div>
+          
+          {/* 모바일 크레딧 표시 */}
+          <div 
+            className={cn(
+              "sm:hidden overflow-hidden transition-all duration-300",
+              showCredits ? "max-h-20 opacity-100 mt-3" : "max-h-0 opacity-0"
+            )}
+          >
+            <div className="flex flex-wrap justify-center gap-1.5">
+              {developers.map((name) => (
+                <span 
+                  key={name}
+                  className="px-2 py-0.5 text-xs rounded-full bg-violet-100 dark:bg-violet-900/50 text-violet-700 dark:text-violet-300"
+                >
+                  {name}
+                </span>
+              ))}
+            </div>
           </div>
         </div>
       </div>

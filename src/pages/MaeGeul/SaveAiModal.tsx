@@ -27,13 +27,25 @@ const SaveModal: React.FC<SaveModalProps> = ({ isOpen, onClose }) => {
 
   return (
     <AnimatePresence>
-      <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4 overflow-y-auto">
+      <div 
+        className="fixed inset-0 z-[9999] flex items-center justify-center p-2 sm:p-4"
+        style={{ 
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          overflowY: 'auto',
+          WebkitOverflowScrolling: 'touch'
+        }}
+      >
         {/* Backdrop */}
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
-          className="fixed inset-0 bg-black/60 backdrop-blur-sm"
+          className="fixed inset-0 bg-black/70"
+          style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0 }}
           onClick={onClose}
         />
 
@@ -44,10 +56,11 @@ const SaveModal: React.FC<SaveModalProps> = ({ isOpen, onClose }) => {
           exit={{ opacity: 0, scale: 0.95, y: 20 }}
           transition={{ duration: 0.3 }}
           className={cn(
-            "relative z-[10000] w-full max-w-md my-4",
-            "bg-card rounded-2xl shadow-2xl",
-            "max-h-[90vh] overflow-y-auto"
+            "relative z-[10000] w-full max-w-md my-2 sm:my-4",
+            "bg-white dark:bg-gray-900 rounded-xl sm:rounded-2xl shadow-2xl",
+            "max-h-[95vh] sm:max-h-[90vh] overflow-y-auto"
           )}
+          style={{ margin: 'auto' }}
           onClick={(e) => e.stopPropagation()}
         >
           {/* 상단 장식 */}

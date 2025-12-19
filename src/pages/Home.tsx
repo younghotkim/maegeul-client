@@ -3,6 +3,7 @@ import React from "react";
 import Header from "../components/Header";
 import Contents from "../components/Contents";
 import Banner from "../components/Banner";
+import ServiceFeatures from "../components/ServiceFeatures";
 import How from "../components/How";
 import Feature from "../components/Feature";
 import Numbers from "../components/Numbers";
@@ -14,6 +15,7 @@ const Home: React.FC = () => {
     <>
       <Header />
       <Banner className="banner" />
+      <ServiceFeatures />
       <Numbers />
       <Feature />
       <How />

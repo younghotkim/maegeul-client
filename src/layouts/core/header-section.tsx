@@ -65,8 +65,10 @@ export function HeaderSection({
       color="transparent"
       className={layoutClasses.header}
       sx={{
-        boxShadow: "none",
-        zIndex: "var(--layout-header-zIndex)",
+        boxShadow: `0 1px 3px ${varAlpha(theme.vars.palette.grey["500Channel"], 0.1)}`,
+        zIndex: 1300,
+        backgroundColor: varAlpha(theme.vars.palette.background.defaultChannel, 0.95),
+        backdropFilter: "blur(8px)",
         ...sx,
       }}
       {...other}

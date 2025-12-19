@@ -11,7 +11,6 @@ import TimelineSeparator from "@mui/lab/TimelineSeparator";
 import TimelineConnector from "@mui/lab/TimelineConnector";
 import TimelineItem, { timelineItemClasses } from "@mui/lab/TimelineItem";
 import { alpha, useTheme } from "@mui/material/styles";
-import Box from "@mui/material/Box";
 
 // ----------------------------------------------------------------------
 

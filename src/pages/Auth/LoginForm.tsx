@@ -15,7 +15,7 @@ const LoginForm = () => {
   const [error, setError] = useState("")
   const [isLoading, setIsLoading] = useState(false)
   const navigate = useNavigate()
-  const { setUser, setToken, setInitialized } = useAuthStore()
+  const { setAuth } = useAuthStore()
 
   const handleLogin = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
@@ -33,16 +33,18 @@ const LoginForm = () => {
         loginResponse.data.token &&
         loginResponse.data.user
       ) {
-        const token = loginResponse.data.token
-        setToken(token)
-        setUser({
-          user_id: loginResponse.data.user.user_id,
-          email: loginResponse.data.user.email,
-          profile_name: loginResponse.data.user.profile_name,
-          profile_picture: loginResponse.data.user.profile_picture || undefined,
-          isKakaoUser: false,
-        })
-        setInitialized(true)
+        const { token, user: userData } = loginResponse.data
+        // setAuth로 한 번에 설정하여 동기화 문제 방지
+        setAuth(
+          {
+            user_id: userData.user_id,
+            email: userData.email,
+            profile_name: userData.profile_name,
+            profile_picture: userData.profile_picture || undefined,
+            isKakaoUser: false,
+          },
+          token
+        )
         navigate("/")
       } else {
         setError("로그인 응답에 필요한 데이터가 없습니다.")

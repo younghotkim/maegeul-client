@@ -220,126 +220,291 @@ export function UserTableRow({
         </MenuList>
       </Popover>
 
-      {/* 모달 컴포넌트 */}
+      {/* 모달 컴포넌트 - 세련된 디자인 */}
       <Dialog
         open={isModalOpen}
         onClose={handleCloseModal}
-        maxWidth="sm"
+        maxWidth="md"
         fullWidth
         sx={{
           "& .MuiDialog-paper": {
-            margin: { xs: "16px", sm: "32px" },
-            maxHeight: { xs: "calc(100% - 32px)", sm: "calc(100% - 64px)" },
-            width: { xs: "calc(100% - 32px)", sm: "auto" },
-            borderRadius: "16px",
+            margin: { xs: "8px", sm: "24px" },
+            maxHeight: { xs: "calc(100% - 16px)", sm: "calc(100% - 48px)" },
+            width: { xs: "calc(100% - 16px)", sm: "auto" },
+            borderRadius: { xs: "16px", sm: "24px" },
+            overflow: "hidden",
+            background: "linear-gradient(180deg, #ffffff 0%, #faf8ff 100%)",
           },
           "& .MuiBackdrop-root": {
-            backgroundColor: "rgba(0, 0, 0, 0.6)",
+            backgroundColor: "rgba(0, 0, 0, 0.7)",
+            backdropFilter: "blur(4px)",
           },
           zIndex: 9999,
         }}
       >
+        {/* 상단 컬러 바 */}
+        <div
+          style={{
+            height: "6px",
+            background: `linear-gradient(90deg, ${backgroundColor} 0%, ${backgroundColor}88 50%, ${backgroundColor} 100%)`,
+          }}
+        />
+
+        {/* 헤더 */}
         <DialogTitle
           sx={{
-            fontFamily: "font-plus-jakarta-sans",
-            fontSize: { xs: "18px", sm: "24px" },
-            textAlign: "center",
-            color: "#7551FF",
-            paddingBottom: "10px",
-            fontWeight: "bold",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "space-between",
+            padding: { xs: "16px", sm: "20px 24px" },
+            borderBottom: "1px solid rgba(0,0,0,0.06)",
           }}
         >
-          📝 무드 일기
+          <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
+            {/* 무드 컬러 인디케이터 */}
+            <div
+              style={{
+                width: "40px",
+                height: "40px",
+                borderRadius: "12px",
+                backgroundColor: backgroundColor,
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                boxShadow: `0 4px 12px ${backgroundColor}40`,
+              }}
+            >
+              <span style={{ fontSize: "20px" }}>
+                {row.color === "빨간색" && "😤"}
+                {row.color === "노란색" && "😊"}
+                {row.color === "파란색" && "😔"}
+                {row.color === "초록색" && "😌"}
+                {!["빨간색", "노란색", "파란색", "초록색"].includes(row.color) && "📝"}
+              </span>
+            </div>
+            <div>
+              <h2
+                style={{
+                  margin: 0,
+                  fontSize: "18px",
+                  fontWeight: 700,
+                  color: "#1a1a2e",
+                }}
+              >
+                {row.title}
+              </h2>
+              <p
+                style={{
+                  margin: 0,
+                  fontSize: "13px",
+                  color: "#888",
+                  marginTop: "2px",
+                }}
+              >
+                {row.formatted_date}
+              </p>
+            </div>
+          </div>
+          <IconButton
+            onClick={handleCloseModal}
+            sx={{
+              backgroundColor: "rgba(0,0,0,0.04)",
+              "&:hover": { backgroundColor: "rgba(0,0,0,0.08)" },
+            }}
+          >
+            <Iconify icon="eva:close-fill" width={20} />
+          </IconButton>
         </DialogTitle>
 
         <DialogContent
-          dividers
           sx={{
-            backgroundColor: "#f4f0ff",
-            padding: { xs: "12px", sm: "20px" },
-            borderRadius: "12px",
-            boxShadow: "0 4px 12px rgba(117, 81, 255, 0.2)",
+            padding: { xs: "16px", sm: "24px" },
             overflowY: "auto",
           }}
         >
+          {/* 일기 내용 카드 */}
           <div
             style={{
-              border: "2px solid #7551FF",
-              padding: "15px",
               backgroundColor: "#fff",
-              borderRadius: "8px",
+              borderRadius: "16px",
+              padding: "20px",
+              boxShadow: "0 2px 12px rgba(0,0,0,0.04)",
+              border: "1px solid rgba(0,0,0,0.06)",
+              marginBottom: "20px",
             }}
           >
-            <h3
-              style={{
-                fontFamily: "font-plus-jakarta-sans",
-                fontSize: "18px",
-                color: "#7551FF",
-                marginBottom: "15px",
-                fontWeight: "bold",
-                wordBreak: "break-word",
-              }}
-            >
-              제목: {row.title}
-            </h3>
-
-            {/* 내용 부분 */}
             <div
               style={{
-                fontFamily: "font-plus-jakarta-sans",
-                fontSize: "16px",
+                display: "flex",
+                alignItems: "center",
+                gap: "8px",
+                marginBottom: "12px",
+              }}
+            >
+              <Iconify icon="solar:document-text-bold" width={18} style={{ color: "#7551FF" }} />
+              <span style={{ fontSize: "14px", fontWeight: 600, color: "#7551FF" }}>
+                일기 내용
+              </span>
+            </div>
+            <p
+              style={{
+                margin: 0,
+                fontSize: "15px",
+                lineHeight: 1.8,
                 color: "#333",
-                lineHeight: "1.6",
-                padding: "10px",
-                backgroundColor: "#fafafa",
-                borderRadius: "8px",
                 whiteSpace: "pre-wrap",
                 wordBreak: "break-word",
               }}
             >
               {row.content}
+            </p>
+          </div>
+
+          {/* AI 분석 결과 카드 */}
+          <div
+            style={{
+              background: "linear-gradient(135deg, #f8f5ff 0%, #f0ebff 100%)",
+              borderRadius: "16px",
+              padding: "20px",
+              border: "1px solid rgba(117, 81, 255, 0.15)",
+            }}
+          >
+            <div
+              style={{
+                display: "flex",
+                alignItems: "center",
+                gap: "8px",
+                marginBottom: "16px",
+              }}
+            >
+              <div
+                style={{
+                  width: "32px",
+                  height: "32px",
+                  borderRadius: "10px",
+                  background: "linear-gradient(135deg, #7551FF 0%, #9775FF 100%)",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                }}
+              >
+                <Iconify icon="solar:magic-stick-3-bold" width={18} style={{ color: "#fff" }} />
+              </div>
+              <div>
+                <span style={{ fontSize: "15px", fontWeight: 600, color: "#5a3fd6" }}>
+                  AI 무디타의 편지
+                </span>
+                <p style={{ margin: 0, fontSize: "12px", color: "#8b7bc7" }}>
+                  당신의 감정을 분석했어요
+                </p>
+              </div>
             </div>
 
-            {/* 감정 분석 결과 부분 */}
-            <h4
-              style={{
-                fontFamily: "font-plus-jakarta-sans",
-                fontSize: "18px",
-                color: "#7551FF",
-                marginTop: "20px",
-                marginBottom: "10px",
-                fontWeight: "bold",
-              }}
-            >
-              💌 무디타의 편지:
-            </h4>
-            <p
-              style={{
-                fontSize: "14px",
-                lineHeight: "1.6",
-                whiteSpace: "pre-wrap",
-                wordBreak: "break-word",
-              }}
-            >
-              {emotionResult}
-            </p>
+            {emotionResult ? (
+              <div
+                style={{
+                  backgroundColor: "#fff",
+                  borderRadius: "12px",
+                  padding: "16px",
+                  boxShadow: "0 2px 8px rgba(117, 81, 255, 0.08)",
+                }}
+              >
+                {emotionResult.split("\n").map((line, index) => {
+                  if (!line.trim()) return <br key={index} />;
+                  
+                  // 해시태그 처리
+                  const parts = line.split(/(#[가-힣a-zA-Z0-9_]+)/g);
+                  return (
+                    <p
+                      key={index}
+                      style={{
+                        margin: "0 0 8px 0",
+                        fontSize: "14px",
+                        lineHeight: 1.7,
+                        color: "#444",
+                      }}
+                    >
+                      {parts.map((part, i) =>
+                        part.startsWith("#") ? (
+                          <span
+                            key={i}
+                            style={{
+                              display: "inline-block",
+                              padding: "2px 8px",
+                              margin: "0 2px",
+                              borderRadius: "12px",
+                              backgroundColor: `${backgroundColor}20`,
+                              color: backgroundColor,
+                              fontSize: "13px",
+                              fontWeight: 500,
+                            }}
+                          >
+                            {part}
+                          </span>
+                        ) : (
+                          part
+                        )
+                      )}
+                    </p>
+                  );
+                })}
+              </div>
+            ) : (
+              <div
+                style={{
+                  backgroundColor: "#fff",
+                  borderRadius: "12px",
+                  padding: "24px",
+                  textAlign: "center",
+                }}
+              >
+                <Iconify
+                  icon="solar:letter-opened-linear"
+                  width={40}
+                  style={{ color: "#ccc", marginBottom: "8px" }}
+                />
+                <p style={{ margin: 0, fontSize: "14px", color: "#999" }}>
+                  무디타에게 받은 편지가 없습니다
+                </p>
+              </div>
+            )}
           </div>
         </DialogContent>
 
-        <DialogActions sx={{ justifyContent: "center", padding: { xs: "12px", sm: "20px" } }}>
+        <DialogActions
+          sx={{
+            padding: { xs: "12px 16px", sm: "16px 24px" },
+            borderTop: "1px solid rgba(0,0,0,0.06)",
+            gap: "12px",
+          }}
+        >
+          <Button
+            onClick={handleDelete}
+            sx={{
+              color: "#ff4d4f",
+              fontSize: "14px",
+              textTransform: "none",
+              "&:hover": { backgroundColor: "rgba(255, 77, 79, 0.08)" },
+            }}
+            startIcon={<Iconify icon="solar:trash-bin-trash-bold" width={18} />}
+          >
+            삭제
+          </Button>
           <Button
             onClick={handleCloseModal}
+            variant="contained"
             sx={{
-              backgroundColor: "#7551FF",
+              background: "linear-gradient(135deg, #7551FF 0%, #9775FF 100%)",
               color: "#fff",
-              padding: { xs: "8px 16px", sm: "10px 20px" },
+              padding: { xs: "8px 20px", sm: "10px 28px" },
               borderRadius: "12px",
-              fontFamily: "font-plus-jakarta-sans",
-              fontSize: { xs: "14px", sm: "16px" },
-              boxShadow: "0 4px 6px rgba(117, 81, 255, 0.3)",
+              fontSize: "14px",
+              fontWeight: 600,
               textTransform: "none",
+              boxShadow: "0 4px 12px rgba(117, 81, 255, 0.3)",
               "&:hover": {
-                backgroundColor: "#6341e0",
+                background: "linear-gradient(135deg, #6341e0 0%, #8866ee 100%)",
+                boxShadow: "0 6px 16px rgba(117, 81, 255, 0.4)",
               },
             }}
           >

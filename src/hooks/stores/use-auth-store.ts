@@ -1,5 +1,5 @@
 import { create } from 'zustand'
-import { persist } from 'zustand/middleware'
+import { persist, createJSONStorage } from 'zustand/middleware'
 
 export interface User {
   user_id: number
@@ -13,10 +13,9 @@ interface AuthState {
   user: User | null
   token: string | null
   isAuthenticated: boolean
-  isInitialized: boolean // 초기화 완료 여부
   setUser: (user: User | null) => void
   setToken: (token: string | null) => void
-  setInitialized: (value: boolean) => void
+  setAuth: (user: User, token: string) => void
   logout: () => void
 }
 
@@ -26,15 +25,22 @@ export const useAuthStore = create<AuthState>()(
       user: null,
       token: null,
       isAuthenticated: false,
-      isInitialized: false,
 
-      setUser: (user) => set({ user, isAuthenticated: !!user }),
+      setUser: (user) => set((state) => ({ 
+        user, 
+        isAuthenticated: !!user && !!state.token 
+      })),
 
-      setToken: (token) => {
-        set({ token, isAuthenticated: !!token })
-      },
+      setToken: (token) => set((state) => ({ 
+        token, 
+        isAuthenticated: !!token && !!state.user 
+      })),
 
-      setInitialized: (value) => set({ isInitialized: value }),
+      setAuth: (user, token) => set({ 
+        user, 
+        token, 
+        isAuthenticated: true 
+      }),
 
       logout: () => {
         set({ user: null, token: null, isAuthenticated: false })
@@ -42,7 +48,8 @@ export const useAuthStore = create<AuthState>()(
     }),
     {
       name: 'auth-storage',
-      // 토큰과 사용자 정보 모두 persist
+      storage: createJSONStorage(() => localStorage),
+      // 모든 상태를 persist
       partialize: (state) => ({ 
         token: state.token,
         user: state.user,

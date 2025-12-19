@@ -54,14 +54,12 @@ export function NavDesktop({ open, width }: NavDesktopProps) {
         left: 0,
         height: "100vh",
         width: open ? width : 0,
-        bgcolor: "var(--layout-nav-bg)",
+        bgcolor: theme.vars.palette.background.paper,
+        boxShadow: open ? theme.shadows[4] : "none",
         borderRight: open
-          ? `1px solid var(--layout-nav-border-color, ${varAlpha(
-              theme.vars.palette.grey["500Channel"],
-              0.12
-            )})`
+          ? `1px solid ${varAlpha(theme.vars.palette.grey["500Channel"], 0.2)}`
           : "none",
-        zIndex: theme.zIndex.drawer,
+        zIndex: theme.zIndex.drawer + 1,
         overflow: "hidden",
         transition: theme.transitions.create("width", {
           duration: theme.transitions.duration.shorter,
@@ -78,6 +76,7 @@ export function NavDesktop({ open, width }: NavDesktopProps) {
           px: 2.5,
           display: "flex",
           flexDirection: "column",
+          bgcolor: theme.vars.palette.background.paper,
           opacity: open ? 1 : 0,
           visibility: open ? "visible" : "hidden",
           transition: theme.transitions.create(["opacity", "visibility"], {
@@ -102,6 +101,7 @@ type NavMobileProps = NavContentProps & {
 
 export function NavMobile({ data, open, onClose }: NavMobileProps) {
   const pathname = usePathname();
+  const theme = useTheme();
 
   // 페이지 이동 시 자동으로 닫기
   useEffect(() => {
@@ -119,10 +119,11 @@ export function NavMobile({ data, open, onClose }: NavMobileProps) {
       ModalProps={{ keepMounted: true }}
       sx={{
         [`& .${drawerClasses.paper}`]: {
-          pt: 2.5,
+          pt: "calc(var(--layout-header-mobile-height) + 16px)", // 헤더 높이 + 여백
           px: 2.5,
           width: 280,
-          bgcolor: "var(--layout-nav-bg)",
+          bgcolor: theme.vars.palette.background.paper,
+          boxShadow: theme.shadows[8],
         },
       }}
     >

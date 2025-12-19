@@ -3,23 +3,15 @@ import Typography from "@mui/material/Typography";
 import Box from "@mui/material/Box";
 import { motion } from "framer-motion";
 
-import { _tasks, _posts, _timeline } from "../../../_mock";
+import { _posts } from "../../../_mock";
 import { DashboardContent } from "../../../layouts/dashboard";
 
 import { AnalyticsNews } from "../analytics-news";
-import { AnalyticsTasks } from "../analytics-tasks";
 import { AnalyticsCurrentVisits } from "../analytics-current-visits";
-import { AnalyticsOrderTimeline } from "../analytics-order-timeline";
-import { AnalyticsWebsiteVisits } from "../analytics-website-visits";
 import { AnalyticsWidgetSummary } from "../analytics-widget-summary";
-import { AnalyticsTrafficBySite } from "../analytics-traffic-by-site";
-import { AnalyticsCurrentSubject } from "../analytics-current-subject";
-import { AnalyticsConversionRates } from "../analytics-conversion-rates";
 import { useAuthStore } from "../../../hooks/stores/use-auth-store";
 import AnalyticsWordCloud from "../../../dashboardComponents/wordcloud/AnalyticsWordCloud";
-import { moodData, Mood } from "../../../api/moodData";
 
-import D3WordCloud from "../../../layouts/d3/D3WordCloud";
 import { useEffect, useState } from "react";
 import { useMoodColorData } from "../../../hooks/useMoodColorData";
 import { useDiaryCount } from "../../../hooks/queries/use-diary-queries";
@@ -59,7 +51,6 @@ export function OverviewAnalyticsView() {
   const { data: diaryCount = 0 } = useDiaryCount(user?.user_id);
 
   const [emotionCount, setEmotionCount] = useState<number>(0);
-  const [emotionData, setEmotionData] = useState<any[]>([]);
 
   useEffect(() => {
     const fetchEmotionAnalysisCount = async (user_id: number) => {
@@ -76,18 +67,7 @@ export function OverviewAnalyticsView() {
     }
   }, [user?.user_id]);
 
-  type Word = {
-    text: string;
-    size: number;
-    color: string;
-  };
-
   const { moodColorData, totalLabels, greenYellowTotal } = useMoodColorData();
-  const words: Word[] = moodData.map((mood) => ({
-    text: mood.label,
-    size: mood.pleasantness * 5,
-    color: mood.color,
-  }));
 
   return (
     <DashboardContent maxWidth="xl">

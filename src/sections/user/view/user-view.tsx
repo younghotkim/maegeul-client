@@ -89,20 +89,67 @@ export function UserView() {
 
   return (
     <DashboardContent>
-      <Box display="flex" alignItems="center" mb={5}>
-        <Typography variant="h4" flexGrow={1}>
-          {user?.profile_name}님의 무드 일기 💖
-        </Typography>
+      {/* 헤더 섹션 */}
+      <Box 
+        display="flex" 
+        flexDirection={{ xs: "column", sm: "row" }}
+        alignItems={{ xs: "flex-start", sm: "center" }}
+        gap={2}
+        mb={{ xs: 3, sm: 4 }}
+      >
+        <Box flexGrow={1}>
+          <Typography 
+            variant="h4" 
+            sx={{ 
+              fontSize: { xs: "1.5rem", sm: "1.75rem", md: "2rem" },
+              fontWeight: 700,
+              background: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
+              backgroundClip: "text",
+              WebkitBackgroundClip: "text",
+              WebkitTextFillColor: "transparent",
+            }}
+          >
+            {user?.profile_name}님의 무드 일기
+          </Typography>
+          <Typography 
+            variant="body2" 
+            sx={{ color: "text.secondary", mt: 0.5 }}
+          >
+            총 {diaryData.length}개의 일기가 있어요
+          </Typography>
+        </Box>
         <Button
           variant="contained"
-          color="inherit"
           startIcon={<Iconify icon="mingcute:add-line" />}
+          href="/MgWriting"
+          sx={{ 
+            width: { xs: "100%", sm: "auto" },
+            whiteSpace: "nowrap",
+            background: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
+            boxShadow: "0 4px 14px rgba(102, 126, 234, 0.4)",
+            borderRadius: 2,
+            px: 3,
+            py: 1,
+            "&:hover": {
+              background: "linear-gradient(135deg, #5a6fd6 0%, #6a4190 100%)",
+              boxShadow: "0 6px 20px rgba(102, 126, 234, 0.5)",
+            },
+          }}
         >
           일기 쓰기
         </Button>
       </Box>
 
-      <Card>
+      {/* 테이블 카드 */}
+      <Card 
+        sx={{ 
+          overflow: "hidden",
+          borderRadius: 3,
+          boxShadow: "0 4px 20px rgba(0, 0, 0, 0.08)",
+          border: "1px solid",
+          borderColor: "divider",
+        }}
+      >
         <UserTableToolbar
           numSelected={table.selected.length}
           filterName={filterName}
@@ -113,14 +160,14 @@ export function UserView() {
         />
 
         <Scrollbar>
-          <TableContainer sx={{ overflow: "unset" }}>
-            <Table sx={{ minWidth: 800 }}>
+          <TableContainer sx={{ overflow: "auto" }}>
+            <Table sx={{ minWidth: { xs: 500, md: 700 } }}>
               <UserTableHead
                 order={table.order}
                 orderBy={table.orderBy}
                 rowCount={diaryData.length}
                 numSelected={table.selected.length}
-                onSort={(id) => table.onSort(id as keyof Diary)} // string을 keyof Diary로 캐스팅
+                onSort={(id) => table.onSort(id as keyof Diary)}
                 onSelectAllRows={(checked) =>
                   table.onSelectAllRows(
                     checked,
@@ -130,8 +177,8 @@ export function UserView() {
                 headLabel={[
                   { id: "title", label: "제목" },
                   { id: "content", label: "내용" },
-                  { id: "color", label: "무드 컬러" },
-                  { id: "formatted_date", label: "작성 시간" },
+                  { id: "color", label: "무드" },
+                  { id: "formatted_date", label: "날짜" },
                   { id: "" },
                 ]}
               />
@@ -141,7 +188,7 @@ export function UserView() {
                     table.page * table.rowsPerPage,
                     table.page * table.rowsPerPage + table.rowsPerPage
                   )
-                  .map((row) => (
+                  .map((row, index) => (
                     <UserTableRow
                       key={row.diary_id}
                       row={row}
@@ -175,6 +222,21 @@ export function UserView() {
           onPageChange={table.onChangePage}
           rowsPerPageOptions={[5, 10, 25]}
           onRowsPerPageChange={table.onChangeRowsPerPage}
+          labelRowsPerPage="페이지당 행:"
+          labelDisplayedRows={({ from, to, count }) => `${from}-${to} / ${count}`}
+          sx={{
+            borderTop: "1px solid",
+            borderColor: "divider",
+            ".MuiTablePagination-toolbar": {
+              flexWrap: { xs: "wrap", sm: "nowrap" },
+              justifyContent: { xs: "center", sm: "flex-end" },
+              px: { xs: 1, sm: 2 },
+              py: 1,
+            },
+            ".MuiTablePagination-selectLabel, .MuiTablePagination-displayedRows": {
+              fontSize: { xs: "0.75rem", sm: "0.875rem" },
+            },
+          }}
         />
       </Card>
     </DashboardContent>
@@ -194,10 +256,10 @@ interface Diary {
 
 export function useTable() {
   const [page, setPage] = useState(0);
-  const [orderBy, setOrderBy] = useState<keyof Diary>("title"); // orderBy는 Diary 속성 중 하나
+  const [orderBy, setOrderBy] = useState<keyof Diary>("diary_id"); // 최신순 정렬 (ID 기준)
   const [rowsPerPage, setRowsPerPage] = useState(5);
   const [selected, setSelected] = useState<string[]>([]);
-  const [order, setOrder] = useState<"asc" | "desc">("asc");
+  const [order, setOrder] = useState<"asc" | "desc">("desc"); // 내림차순 (최신순)
 
   const onSort = useCallback(
     (id: keyof Diary) => {
