@@ -226,11 +226,23 @@ export function UserTableRow({
         onClose={handleCloseModal}
         maxWidth="sm"
         fullWidth
+        sx={{
+          "& .MuiDialog-paper": {
+            margin: { xs: "16px", sm: "32px" },
+            maxHeight: { xs: "calc(100% - 32px)", sm: "calc(100% - 64px)" },
+            width: { xs: "calc(100% - 32px)", sm: "auto" },
+            borderRadius: "16px",
+          },
+          "& .MuiBackdrop-root": {
+            backgroundColor: "rgba(0, 0, 0, 0.6)",
+          },
+          zIndex: 9999,
+        }}
       >
         <DialogTitle
-          style={{
+          sx={{
             fontFamily: "font-plus-jakarta-sans",
-            fontSize: "24px",
+            fontSize: { xs: "18px", sm: "24px" },
             textAlign: "center",
             color: "#7551FF",
             paddingBottom: "10px",
@@ -242,11 +254,12 @@ export function UserTableRow({
 
         <DialogContent
           dividers
-          style={{
+          sx={{
             backgroundColor: "#f4f0ff",
-            padding: "20px",
+            padding: { xs: "12px", sm: "20px" },
             borderRadius: "12px",
             boxShadow: "0 4px 12px rgba(117, 81, 255, 0.2)",
+            overflowY: "auto",
           }}
         >
           <div
@@ -260,58 +273,74 @@ export function UserTableRow({
             <h3
               style={{
                 fontFamily: "font-plus-jakarta-sans",
-                fontSize: "20px",
+                fontSize: "18px",
                 color: "#7551FF",
                 marginBottom: "15px",
                 fontWeight: "bold",
+                wordBreak: "break-word",
               }}
             >
               제목: {row.title}
             </h3>
 
             {/* 내용 부분 */}
-            <h2
+            <div
               style={{
                 fontFamily: "font-plus-jakarta-sans",
-                fontSize: "18px",
+                fontSize: "16px",
                 color: "#333",
                 lineHeight: "1.6",
-                padding: "10px 0",
+                padding: "10px",
                 backgroundColor: "#fafafa",
                 borderRadius: "8px",
+                whiteSpace: "pre-wrap",
+                wordBreak: "break-word",
               }}
             >
               {row.content}
-            </h2>
+            </div>
 
             {/* 감정 분석 결과 부분 */}
             <h4
               style={{
                 fontFamily: "font-plus-jakarta-sans",
-                fontSize: "20px",
+                fontSize: "18px",
                 color: "#7551FF",
-                marginBottom: "15px",
+                marginTop: "20px",
+                marginBottom: "10px",
                 fontWeight: "bold",
               }}
             >
               💌 무디타의 편지:
             </h4>
-            <p>{emotionResult}</p>
+            <p
+              style={{
+                fontSize: "14px",
+                lineHeight: "1.6",
+                whiteSpace: "pre-wrap",
+                wordBreak: "break-word",
+              }}
+            >
+              {emotionResult}
+            </p>
           </div>
         </DialogContent>
 
-        <DialogActions style={{ justifyContent: "center", padding: "20px" }}>
+        <DialogActions sx={{ justifyContent: "center", padding: { xs: "12px", sm: "20px" } }}>
           <Button
             onClick={handleCloseModal}
-            style={{
+            sx={{
               backgroundColor: "#7551FF",
               color: "#fff",
-              padding: "10px 20px",
+              padding: { xs: "8px 16px", sm: "10px 20px" },
               borderRadius: "12px",
               fontFamily: "font-plus-jakarta-sans",
-              fontSize: "16px",
+              fontSize: { xs: "14px", sm: "16px" },
               boxShadow: "0 4px 6px rgba(117, 81, 255, 0.3)",
               textTransform: "none",
+              "&:hover": {
+                backgroundColor: "#6341e0",
+              },
             }}
           >
             닫기

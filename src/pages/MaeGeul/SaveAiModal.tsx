@@ -27,13 +27,13 @@ const SaveModal: React.FC<SaveModalProps> = ({ isOpen, onClose }) => {
 
   return (
     <AnimatePresence>
-      <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+      <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4 overflow-y-auto">
         {/* Backdrop */}
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
-          className="absolute inset-0 bg-black/60 backdrop-blur-sm"
+          className="fixed inset-0 bg-black/60 backdrop-blur-sm"
           onClick={onClose}
         />
 
@@ -44,9 +44,9 @@ const SaveModal: React.FC<SaveModalProps> = ({ isOpen, onClose }) => {
           exit={{ opacity: 0, scale: 0.95, y: 20 }}
           transition={{ duration: 0.3 }}
           className={cn(
-            "relative z-10 w-full max-w-md",
+            "relative z-[10000] w-full max-w-md my-4",
             "bg-card rounded-2xl shadow-2xl",
-            "overflow-hidden"
+            "max-h-[90vh] overflow-y-auto"
           )}
           onClick={(e) => e.stopPropagation()}
         >
