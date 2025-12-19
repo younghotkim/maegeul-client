@@ -21,11 +21,25 @@ const getAPIURL = () => {
 };
 
 const API_URL = getAPIURL();
-// 환경 변수에서 API URL을 가져오고, 없으면 기본값으로 localhost 사용
 
-export const analyzeEmotion = async (text: string) => {
+export interface AnalyzeEmotionParams {
+  text: string;
+  moodColor?: string;
+  moodLabels?: string[];
+  pleasantness?: number;
+  energy?: number;
+  userName?: string;
+}
+
+export const analyzeEmotion = async (
+  params: string | AnalyzeEmotionParams
+): Promise<string> => {
   try {
-    const response = await axios.post(`${API_URL}/analyze/`, { text });
+    // 하위 호환성: string만 전달된 경우
+    const requestBody =
+      typeof params === "string" ? { text: params } : params;
+
+    const response = await axios.post(`${API_URL}/analyze/`, requestBody);
     return response.data.emotion;
   } catch (error) {
     console.error("Error analyzing emotion:", error);

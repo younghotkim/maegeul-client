@@ -1,30 +1,27 @@
-import React from "react"
-import { motion } from "framer-motion"
-import { Button } from "@/components/ui/button"
-import { Badge } from "@/components/ui/badge"
-import { cn } from "@/lib/utils"
+import React from "react";
+import { motion } from "framer-motion";
+import { Button } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
 import {
   Mail,
-  Heart,
   Sparkles,
   Palette,
-  Tag,
   Lightbulb,
   Save,
-  BookHeart,
-} from "lucide-react"
-import letter from "../../../Image/letter.png"
-import postbox from "../../../Image/postbox.png"
-import heart from "../../../Image/heart.png"
+  Heart,
+  MessageCircle,
+} from "lucide-react";
+import letter from "../../../Image/letter.png";
+import postbox from "../../../Image/postbox.png";
 
 interface DiaryGuidePanelProps {
-  emotionResult: string | null
-  userName?: string
-  colorName: string
-  highlightedColor: string | null
-  highlightedLabels: string[]
-  onLabelClick: (label: string) => void
-  onSaveAi: () => void
+  emotionResult: string | null;
+  userName?: string;
+  colorName: string;
+  highlightedColor: string | null;
+  highlightedLabels: string[];
+  onLabelClick: (label: string) => void;
+  onSaveAi: () => void;
 }
 
 export function DiaryGuidePanel({
@@ -40,222 +37,281 @@ export function DiaryGuidePanel({
   if (emotionResult) {
     return (
       <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.6 }}
-        className="h-full flex flex-col p-4 sm:p-6"
+        initial={{ opacity: 0, scale: 0.95 }}
+        animate={{ opacity: 1, scale: 1 }}
+        transition={{ duration: 0.5 }}
+        className={cn(
+          "h-full min-h-[500px] sm:min-h-[550px] lg:min-h-[600px]",
+          "bg-gradient-to-br from-violet-50 via-purple-50 to-pink-50",
+          "dark:from-violet-950/30 dark:via-purple-950/20 dark:to-pink-950/30",
+          "rounded-2xl lg:rounded-3xl",
+          "shadow-xl shadow-violet-200/30 dark:shadow-black/20",
+          "border border-violet-100 dark:border-violet-900/30",
+          "overflow-hidden flex flex-col"
+        )}
       >
         {/* 헤더 */}
-        <div className="flex items-center gap-2 mb-4 lg:mb-6">
-          <Mail className="w-5 h-5 sm:w-6 sm:h-6 text-primary" />
-          <h2 className="text-base sm:text-lg lg:text-xl font-bold text-foreground">
-            {userName}님을 위한 AI 무디타의 편지
-          </h2>
-          <img
-            src={letter}
-            className="w-6 h-6 sm:w-8 sm:h-8"
-            alt="Letter"
-          />
+        <div className="px-5 sm:px-6 lg:px-8 pt-5 sm:pt-6 pb-4 border-b border-violet-100 dark:border-violet-900/30">
+          <div className="flex items-center gap-3">
+            <motion.div
+              className="w-10 h-10 rounded-xl bg-gradient-to-br from-violet-500 to-purple-600 flex items-center justify-center shadow-lg"
+              animate={{ rotate: [0, 5, -5, 0] }}
+              transition={{ duration: 2, repeat: Infinity, repeatDelay: 3 }}
+            >
+              <Mail className="w-5 h-5 text-white" />
+            </motion.div>
+            <div>
+              <h2 className="text-lg sm:text-xl font-bold text-violet-900 dark:text-violet-100">
+                AI 무디타의 편지
+              </h2>
+              <p className="text-sm text-violet-600/70 dark:text-violet-400/70">
+                {userName}님을 위해 작성했어요
+              </p>
+            </div>
+            <img src={letter} className="w-8 h-8 ml-auto" alt="Letter" />
+          </div>
         </div>
 
         {/* 편지 내용 */}
-        <motion.div
-          initial={{ opacity: 0, scale: 0.95 }}
-          animate={{ opacity: 1, scale: 1 }}
-          transition={{ duration: 0.5, delay: 0.2 }}
-          className={cn(
-            "flex-1 relative p-4 sm:p-6",
-            "bg-white dark:bg-gray-800",
-            "rounded-2xl shadow-lg",
-            "border border-primary/10"
-          )}
-        >
-          {/* 편지 장식 */}
-          <div className="absolute -top-2 -right-2 w-6 h-6 sm:w-8 sm:h-8">
-            <Sparkles className="w-full h-full text-yellow-400" />
-          </div>
-
-          <div className="prose prose-sm dark:prose-invert max-w-none overflow-y-auto max-h-[200px] sm:max-h-[280px] lg:max-h-[350px]">
-            {emotionResult.split("\n").map((sentence, index) => (
-              <p
-                key={index}
-                className="mb-2 sm:mb-3 text-sm sm:text-base text-foreground/90 leading-relaxed"
-              >
-                {sentence}
-              </p>
-            ))}
-          </div>
-
-          {/* 말풍선 꼬리 */}
-          <div className="absolute -bottom-3 left-1/2 -translate-x-1/2 w-0 h-0 border-l-[12px] border-l-transparent border-r-[12px] border-r-transparent border-t-[12px] border-t-white dark:border-t-gray-800" />
-        </motion.div>
-
-        {/* 우체통 & 저장 버튼 */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5, delay: 0.4 }}
-          className="flex flex-col items-center mt-6 lg:mt-8 pt-4"
-        >
-          <img
-            src={postbox}
-            className="w-14 h-14 sm:w-16 sm:h-16 lg:w-20 lg:h-20 mb-3 lg:mb-4"
-            alt="Postbox"
-          />
-          <Button
-            onClick={onSaveAi}
-            variant="violet"
-            size="lg"
-            className="gap-2"
+        <div className="flex-1 px-5 sm:px-6 lg:px-8 py-5 overflow-y-auto">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.2 }}
+            className={cn(
+              "relative p-5 sm:p-6",
+              "bg-white dark:bg-gray-800",
+              "rounded-2xl shadow-lg",
+              "border border-violet-100 dark:border-violet-800/50"
+            )}
           >
-            <Save className="w-4 h-4" />
-            편지 저장하기
-          </Button>
-        </motion.div>
+            {/* 장식 */}
+            <motion.div
+              className="absolute -top-2 -right-2"
+              animate={{ scale: [1, 1.2, 1] }}
+              transition={{ duration: 2, repeat: Infinity }}
+            >
+              <Sparkles className="w-6 h-6 text-yellow-400" />
+            </motion.div>
+
+            <div className="space-y-3">
+              {emotionResult.split("\n").map((sentence, index) => (
+                <motion.p
+                  key={index}
+                  initial={{ opacity: 0, x: -10 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ delay: 0.1 * index }}
+                  className="text-sm sm:text-base text-gray-700 dark:text-gray-200 leading-relaxed"
+                >
+                  {sentence}
+                </motion.p>
+              ))}
+            </div>
+
+            {/* 말풍선 꼬리 */}
+            <div className="absolute -bottom-3 left-8 w-0 h-0 border-l-[10px] border-l-transparent border-r-[10px] border-r-transparent border-t-[12px] border-t-white dark:border-t-gray-800" />
+          </motion.div>
+        </div>
+
+        {/* 저장 버튼 */}
+        <div className="px-5 sm:px-6 lg:px-8 py-5 border-t border-violet-100 dark:border-violet-900/30 bg-white/50 dark:bg-gray-900/30">
+          <div className="flex flex-col items-center gap-4">
+            <motion.img
+              src={postbox}
+              className="w-16 h-16"
+              alt="Postbox"
+              animate={{ y: [0, -5, 0] }}
+              transition={{ duration: 2, repeat: Infinity }}
+            />
+            <Button
+              onClick={onSaveAi}
+              className={cn(
+                "gap-2 px-6",
+                "bg-gradient-to-r from-violet-600 to-purple-600",
+                "hover:from-violet-700 hover:to-purple-700",
+                "text-white font-medium",
+                "shadow-lg shadow-violet-500/25"
+              )}
+            >
+              <Save className="w-4 h-4" />
+              편지 저장하기
+            </Button>
+          </div>
+        </div>
       </motion.div>
-    )
+    );
   }
 
   // 기본 가이드 UI
   return (
     <motion.div
-      initial={{ opacity: 0, x: -20 }}
-      animate={{ opacity: 1, x: 0 }}
-      transition={{ duration: 0.6 }}
-      className="h-full flex flex-col"
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      transition={{ duration: 0.5 }}
+      className={cn(
+        "h-full min-h-[500px] sm:min-h-[550px] lg:min-h-[600px]",
+        "bg-white dark:bg-gray-900",
+        "rounded-2xl lg:rounded-3xl",
+        "shadow-xl shadow-gray-200/50 dark:shadow-black/20",
+        "border border-gray-100 dark:border-gray-800",
+        "overflow-hidden flex flex-col"
+      )}
     >
-      {/* 일기장 커버 스타일 */}
+      {/* 상단 그라데이션 바 */}
       <div
-        className={cn(
-          "flex-1 flex flex-col",
-          "bg-white dark:bg-gray-800",
-          "rounded-xl lg:rounded-2xl shadow-lg",
-          "border border-gray-100 dark:border-gray-700",
-          "overflow-hidden"
-        )}
-      >
-        {/* 헤더 */}
-        <div className="p-4 sm:p-5 lg:p-6 bg-gradient-to-r from-primary/10 to-violet-500/10 dark:from-primary/20 dark:to-violet-500/20">
-          <div className="flex items-center gap-2">
-            <BookHeart className="w-5 h-5 sm:w-6 sm:h-6 text-primary" />
-            <h1 className="text-lg sm:text-xl lg:text-2xl font-bold text-foreground">
-              {userName}님의 무드일기
-            </h1>
-            <img
-              src={heart}
-              alt="Heart"
-              className="w-6 h-6 sm:w-7 sm:h-7 lg:w-8 lg:h-8"
-            />
-          </div>
-        </div>
+        className="h-1"
+        style={{
+          background: highlightedColor
+            ? `linear-gradient(to right, ${highlightedColor}, ${highlightedColor}88)`
+            : "linear-gradient(to right, #8b5cf6, #a855f7)",
+        }}
+      />
 
-        {/* 내용 영역 */}
-        <div className="flex-1 p-4 sm:p-5 lg:p-6 space-y-4 lg:space-y-6 overflow-y-auto">
-          {/* 작성 안내 카드 */}
-          <div
-            className={cn(
-              "p-3 sm:p-4 lg:p-5 rounded-xl",
-              "bg-gradient-to-br from-blue-50 to-indigo-50",
-              "dark:from-blue-950/30 dark:to-indigo-950/30",
-              "border border-blue-100 dark:border-blue-900/30"
-            )}
+      {/* 헤더 */}
+      <div className="px-5 sm:px-6 lg:px-8 pt-5 sm:pt-6 pb-4 border-b border-gray-100 dark:border-gray-800">
+        <div className="flex items-center gap-3">
+          <motion.div
+            className="w-10 h-10 rounded-xl flex items-center justify-center shadow-lg"
+            style={{
+              background: highlightedColor
+                ? `linear-gradient(135deg, ${highlightedColor}, ${highlightedColor}cc)`
+                : "linear-gradient(135deg, #8b5cf6, #a855f7)",
+            }}
+            whileHover={{ scale: 1.05 }}
           >
-            <div className="flex items-center gap-2 mb-2 sm:mb-3">
-              <Lightbulb className="w-4 h-4 sm:w-5 sm:h-5 text-blue-500" />
-              <h2 className="text-sm sm:text-base lg:text-lg font-semibold text-blue-900 dark:text-blue-100">
-                작성 안내
-              </h2>
-            </div>
-            <ul className="space-y-1.5 sm:space-y-2 text-xs sm:text-sm text-blue-800 dark:text-blue-200">
-              <li className="flex gap-2">
-                <span className="text-blue-500 font-medium">1.</span>
-                <span>
-                  감정을 느낀 구체적인 "상황"과 그 때 나의 "행동", "생각"을
-                  포함해 적어보세요.
-                </span>
-              </li>
-              <li className="flex gap-2">
-                <span className="text-blue-500 font-medium">2.</span>
-                <span>
-                  하루를 회고하며 나의 감정을 중심으로 3줄 이상 적어보는 것을
-                  추천드려요.
-                </span>
-              </li>
-              <li className="flex gap-2">
-                <span className="text-blue-500 font-medium">3.</span>
-                <span>
-                  감정을 느꼈을 때 나의 신체적 변화에 대해서 적어보는 것도
-                  도움이 되어요.
-                </span>
-              </li>
-            </ul>
-          </div>
-
-          {/* 오늘의 무드 진단 카드 */}
-          <div
-            className={cn(
-              "p-3 sm:p-4 lg:p-5 rounded-xl",
-              "bg-gradient-to-br from-violet-50 to-purple-50",
-              "dark:from-violet-950/30 dark:to-purple-950/30",
-              "border border-violet-100 dark:border-violet-900/30"
-            )}
-          >
-            <div className="flex items-center gap-2 mb-3 sm:mb-4">
-              <Sparkles className="w-4 h-4 sm:w-5 sm:h-5 text-violet-500" />
-              <h2 className="text-sm sm:text-base lg:text-lg font-semibold text-violet-900 dark:text-violet-100">
-                오늘의 무드 진단
-              </h2>
-            </div>
-
-            {/* 무드 컬러 */}
-            <div className="flex items-center gap-2 sm:gap-3 mb-3 sm:mb-4">
-              <Palette className="w-4 h-4 text-violet-500 flex-shrink-0" />
-              <span className="text-xs sm:text-sm text-violet-800 dark:text-violet-200">
-                무드 컬러:
-              </span>
-              <span className="font-medium text-xs sm:text-sm text-violet-900 dark:text-violet-100">
-                {colorName}
-              </span>
-              {highlightedColor && (
-                <div
-                  className="w-5 h-5 sm:w-6 sm:h-6 rounded-md shadow-sm border border-white/50 flex-shrink-0"
-                  style={{ backgroundColor: highlightedColor }}
-                />
-              )}
-            </div>
-
-            {/* 무드 태그 */}
-            <div className="flex flex-wrap items-start gap-2 mb-3 sm:mb-4">
-              <div className="flex items-center gap-1 sm:gap-2 flex-shrink-0">
-                <Tag className="w-4 h-4 text-violet-500" />
-                <span className="text-xs sm:text-sm text-violet-800 dark:text-violet-200">
-                  무드 태그:
-                </span>
-              </div>
-              <div className="flex flex-wrap gap-1.5 sm:gap-2">
-                {highlightedLabels.map((label) => (
-                  <Badge
-                    key={label}
-                    variant="violet"
-                    className="cursor-pointer hover:scale-105 transition-transform text-xs"
-                    onClick={() => onLabelClick(label)}
-                  >
-                    #{label}
-                  </Badge>
-                ))}
-              </div>
-            </div>
-
-            {/* 팁 */}
-            <div className="flex items-start gap-2 p-2 sm:p-3 bg-white/50 dark:bg-gray-900/30 rounded-lg">
-              <span className="text-base sm:text-lg">💭</span>
-              <p className="text-xs text-violet-700 dark:text-violet-300">
-                감정 키워드를 선택하면 제목에 무드태그를 걸 수 있어요.
-              </p>
-            </div>
+            <Heart className="w-5 h-5 text-white" />
+          </motion.div>
+          <div>
+            <h2 className="text-lg sm:text-xl font-bold text-gray-900 dark:text-white">
+              {userName}님의 무드
+            </h2>
+            <p className="text-sm text-gray-500 dark:text-gray-400">
+              오늘의 감정 상태
+            </p>
           </div>
         </div>
       </div>
+
+      {/* 내용 영역 */}
+      <div className="flex-1 px-5 sm:px-6 lg:px-8 py-5 space-y-5 overflow-y-auto">
+        {/* 무드 컬러 카드 */}
+        <motion.div
+          className={cn(
+            "p-4 sm:p-5 rounded-xl",
+            "bg-gradient-to-br from-gray-50 to-gray-100/50",
+            "dark:from-gray-800 dark:to-gray-800/50",
+            "border border-gray-100 dark:border-gray-700"
+          )}
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.1 }}
+        >
+          <div className="flex items-center gap-3 mb-3">
+            <Palette className="w-5 h-5 text-gray-500" />
+            <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
+              오늘의 무드 컬러
+            </span>
+          </div>
+          <div className="flex items-center gap-3">
+            {highlightedColor && (
+              <motion.div
+                className="w-12 h-12 rounded-xl shadow-lg"
+                style={{ backgroundColor: highlightedColor }}
+                whileHover={{ scale: 1.1 }}
+                transition={{ type: "spring", stiffness: 400 }}
+              />
+            )}
+            <span
+              className="text-xl font-bold"
+              style={{ color: highlightedColor || "#8b5cf6" }}
+            >
+              {colorName}
+            </span>
+          </div>
+        </motion.div>
+
+        {/* 감정 태그 */}
+        <motion.div
+          className={cn(
+            "p-4 sm:p-5 rounded-xl",
+            "bg-gradient-to-br from-violet-50 to-purple-50",
+            "dark:from-violet-950/30 dark:to-purple-950/30",
+            "border border-violet-100 dark:border-violet-900/30"
+          )}
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.2 }}
+        >
+          <div className="flex items-center gap-3 mb-3">
+            <MessageCircle className="w-5 h-5 text-violet-500" />
+            <span className="text-sm font-medium text-violet-700 dark:text-violet-300">
+              감정 키워드
+            </span>
+          </div>
+          <div className="flex flex-wrap gap-2">
+            {highlightedLabels.map((label, index) => (
+              <motion.button
+                key={label}
+                initial={{ opacity: 0, scale: 0.8 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ delay: 0.05 * index }}
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                onClick={() => onLabelClick(label)}
+                className={cn(
+                  "px-3 py-1.5 rounded-full text-sm font-medium",
+                  "transition-all duration-200",
+                  "hover:shadow-md"
+                )}
+                style={{
+                  backgroundColor: `${highlightedColor || "#8b5cf6"}20`,
+                  color: highlightedColor || "#8b5cf6",
+                  border: `1px solid ${highlightedColor || "#8b5cf6"}40`,
+                }}
+              >
+                #{label}
+              </motion.button>
+            ))}
+          </div>
+          <p className="text-xs text-violet-600/60 dark:text-violet-400/60 mt-3">
+            💡 키워드를 탭하면 제목에 추가돼요
+          </p>
+        </motion.div>
+
+        {/* 작성 팁 */}
+        <motion.div
+          className={cn(
+            "p-4 sm:p-5 rounded-xl",
+            "bg-gradient-to-br from-amber-50 to-orange-50",
+            "dark:from-amber-950/30 dark:to-orange-950/30",
+            "border border-amber-100 dark:border-amber-900/30"
+          )}
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.3 }}
+        >
+          <div className="flex items-center gap-3 mb-3">
+            <Lightbulb className="w-5 h-5 text-amber-500" />
+            <span className="text-sm font-medium text-amber-700 dark:text-amber-300">
+              작성 팁
+            </span>
+          </div>
+          <ul className="space-y-2 text-sm text-amber-800/80 dark:text-amber-200/80">
+            <li className="flex gap-2">
+              <span>•</span>
+              <span>감정을 느낀 상황을 구체적으로 적어보세요</span>
+            </li>
+            <li className="flex gap-2">
+              <span>•</span>
+              <span>그때의 생각과 행동을 함께 기록해보세요</span>
+            </li>
+            <li className="flex gap-2">
+              <span>•</span>
+              <span>3줄 이상 작성하면 AI 분석을 받을 수 있어요</span>
+            </li>
+          </ul>
+        </motion.div>
+      </div>
     </motion.div>
-  )
+  );
 }

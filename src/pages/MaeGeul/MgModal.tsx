@@ -1,11 +1,12 @@
-import React, { useState } from "react"
-import { useNavigate } from "react-router-dom"
-import { motion, AnimatePresence } from "framer-motion"
-import { analyzeEmotion } from "../../api/analyzeApi"
-import { useAuthStore } from "../../hooks/stores/use-auth-store"
-import { useDiaryCount } from "../../hooks/queries/use-diary-queries"
-import { Button } from "@/components/ui/button"
-import { cn } from "@/lib/utils"
+import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { motion, AnimatePresence } from "framer-motion";
+import { analyzeEmotion } from "../../api/analyzeApi";
+import { useAuthStore } from "../../hooks/stores/use-auth-store";
+import { useMoodStore } from "../../hooks/stores/use-mood-store";
+import { useDiaryCount } from "../../hooks/queries/use-diary-queries";
+import { Button } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
 import {
   X,
   Sparkles,
@@ -13,13 +14,13 @@ import {
   ExternalLink,
   Loader2,
   Bot,
-} from "lucide-react"
-import Logo from "../../logo/main_logo.png"
+} from "lucide-react";
+import Logo from "../../logo/main_logo.png";
 
 interface ModalProps {
-  content: string
-  onClose: () => void
-  onAnalyzeComplete: (result: string) => void
+  content: string;
+  onClose: () => void;
+  onAnalyzeComplete: (result: string) => void;
 }
 
 const MgModal: React.FC<ModalProps> = ({
@@ -27,33 +28,62 @@ const MgModal: React.FC<ModalProps> = ({
   onClose,
   onAnalyzeComplete,
 }) => {
-  const [loading, setLoading] = useState(false)
-  const [isChecked, setIsChecked] = useState(false)
-  const user = useAuthStore((state) => state.user)
-  const { data: diaryCountData } = useDiaryCount(user?.user_id)
-  const navigate = useNavigate()
+  const [loading, setLoading] = useState(false);
+  const [isChecked, setIsChecked] = useState(false);
+  const user = useAuthStore((state) => state.user);
+  const { data: diaryCountData } = useDiaryCount(user?.user_id);
+  const navigate = useNavigate();
 
-  const diaryCount = diaryCountData ?? 0
+  // 무드 스토어에서 감정 데이터 가져오기
+  const { pleasantness, energy, highlightedLabels, highlightedColor } =
+    useMoodStore();
+
+  // 색상 코드를 한글 이름으로 변환
+  const getColorName = (colorValue: string | null): string => {
+    if (!colorValue) return "";
+    switch (colorValue) {
+      case "#EE5D50":
+        return "빨간색";
+      case "#FFDE57":
+        return "노란색";
+      case "#6AD2FF":
+        return "파란색";
+      case "#35D28A":
+        return "초록색";
+      default:
+        return "";
+    }
+  };
+
+  const diaryCount = diaryCountData ?? 0;
   const diaryText =
-    diaryCount === 0 ? "첫 번째" : diaryCount ? `${diaryCount}번째` : "N번째"
+    diaryCount === 0 ? "첫 번째" : diaryCount ? `${diaryCount}번째` : "N번째";
 
   const handleDashboard = () => {
-    navigate("/dashboard")
-  }
+    navigate("/dashboard");
+  };
 
   const handleAnalyze = async () => {
-    if (!isChecked) return
-    setLoading(true)
+    if (!isChecked) return;
+    setLoading(true);
     try {
-      const emotion = await analyzeEmotion(content)
-      onAnalyzeComplete(emotion)
+      // 무드 데이터와 함께 분석 요청
+      const emotion = await analyzeEmotion({
+        text: content,
+        moodColor: getColorName(highlightedColor),
+        moodLabels: highlightedLabels,
+        pleasantness,
+        energy,
+        userName: user?.profile_name,
+      });
+      onAnalyzeComplete(emotion);
     } catch (error) {
-      console.error("감정 분석 중 오류 발생:", error)
+      console.error("감정 분석 중 오류 발생:", error);
     } finally {
-      setLoading(false)
-      onClose()
+      setLoading(false);
+      onClose();
     }
-  }
+  };
 
   return (
     <AnimatePresence>
@@ -80,8 +110,15 @@ const MgModal: React.FC<ModalProps> = ({
           )}
           onClick={(e) => e.stopPropagation()}
         >
-          {/* 상단 장식 */}
-          <div className="h-2 bg-gradient-to-r from-primary via-violet-500 to-primary" />
+          {/* 상단 장식 - 무드 컬러 반영 */}
+          <div
+            className="h-2"
+            style={{
+              background: highlightedColor
+                ? `linear-gradient(to right, ${highlightedColor}, ${highlightedColor}88, ${highlightedColor})`
+                : "linear-gradient(to right, #8b5cf6, #a855f7, #8b5cf6)",
+            }}
+          />
 
           {/* 닫기 버튼 */}
           <button
@@ -116,6 +153,39 @@ const MgModal: React.FC<ModalProps> = ({
               </p>
             </div>
 
+            {/* 현재 무드 상태 표시 */}
+            {highlightedColor && (
+              <motion.div
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.3 }}
+                className="flex flex-wrap items-center justify-center gap-2 mb-6"
+              >
+                <div
+                  className="flex items-center gap-2 px-3 py-1.5 rounded-full text-sm font-medium"
+                  style={{
+                    backgroundColor: `${highlightedColor}20`,
+                    color: highlightedColor,
+                    border: `1px solid ${highlightedColor}40`,
+                  }}
+                >
+                  <div
+                    className="w-3 h-3 rounded-full"
+                    style={{ backgroundColor: highlightedColor }}
+                  />
+                  {getColorName(highlightedColor)}
+                </div>
+                {highlightedLabels.slice(0, 3).map((label) => (
+                  <span
+                    key={label}
+                    className="px-3 py-1.5 rounded-full text-sm font-medium bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-300"
+                  >
+                    #{label}
+                  </span>
+                ))}
+              </motion.div>
+            )}
+
             {/* AI 분석 섹션 */}
             <div
               className={cn(
@@ -147,8 +217,14 @@ const MgModal: React.FC<ModalProps> = ({
                     AI 하루진단 받아보기
                   </h3>
                   <p className="text-sm text-muted-foreground mb-4">
-                    무디타봇이 {user?.profile_name}님의 일기를 분석하여 오늘 느낀
-                    감정을 파악하고, 맞춤형 기분 가이드를 제공해드려요.
+                    무디타봇이 {user?.profile_name}님의 일기와{" "}
+                    <span
+                      className="font-medium"
+                      style={{ color: highlightedColor || "#8b5cf6" }}
+                    >
+                      {getColorName(highlightedColor) || "무드"} 감정
+                    </span>
+                    을 분석하여 맞춤형 피드백을 제공해드려요.
                   </p>
 
                   {/* 동의 체크박스 */}
@@ -201,7 +277,7 @@ const MgModal: React.FC<ModalProps> = ({
         </motion.div>
       </div>
     </AnimatePresence>
-  )
-}
+  );
+};
 
-export default MgModal
+export default MgModal;
