@@ -1,200 +1,262 @@
-// src/components/Contents.tsx
-import React from "react";
-import ImageSrc1 from "../Image/01.jpeg";
-import ImageSrc2 from "../Image/02.jpeg";
-import ImageSrc3 from "../Image/03.jpeg";
-import ImageSrc4 from "../Image/04.jpeg";
-import ArrowPurple from "../Icon/Arrow Purple.png";
-import { Link } from "react-router-dom";
+import React from "react"
+import { Link } from "react-router-dom"
+import { motion } from "framer-motion"
+import { useAuthStore } from "../hooks/stores/use-auth-store"
+import { Button } from "@/components/ui/button"
+import { Badge } from "@/components/ui/badge"
+import { cn } from "@/lib/utils"
+import { ArrowRight, Sparkles, PenLine, LayoutDashboard } from "lucide-react"
+import ImageSrc1 from "../Image/01.jpeg"
+import ImageSrc2 from "../Image/02.jpeg"
+import ImageSrc3 from "../Image/03.jpeg"
+import ImageSrc4 from "../Image/04.jpeg"
 
 const Contents: React.FC = () => {
+  const isAuthenticated = useAuthStore((state) => state.isAuthenticated)
+
   const cardContents = [
     {
       title: "자기 계발",
-      text: "더 단단한 나를 만드는 4가지 일상 실천 콘텐츠를 확인해보세요.",
-      tag: [
-        "독서하기",
-        "외국어 배우기",
-        "전공 공부하기",
-        "버킷리스트 작성하여 실천하기",
-        "봉사활동하기",
-      ],
+      text: "더 단단한 나를 만드는 일상 실천 콘텐츠",
+      tag: ["독서하기", "외국어 배우기", "전공 공부하기", "버킷리스트 실천"],
       src: ImageSrc1,
+      color: "from-violet-500/80 to-purple-600/80",
     },
     {
       title: "자기 관리",
-      text: "더 단단한 나를 만드는 4가지 일상 실천 콘텐츠를 확인해보세요.",
-      tag: [
-        "일정한 시간에 잠자고 일어나기",
-        "감사일기 쓰기",
-        "옷,방 정리하기",
-        "거울 보면서 웃기",
-        "햇빛 쬐기",
-        "명상·복식호흡하기",
-        "반신욕",
-      ],
+      text: "건강한 루틴으로 시작하는 하루",
+      tag: ["일정한 수면", "감사일기", "정리정돈", "명상·호흡"],
       src: ImageSrc2,
+      color: "from-blue-500/80 to-indigo-600/80",
     },
     {
       title: "취미 활동",
-      text: "더 단단한 나를 만드는 4가지 일상 실천 콘텐츠를 확인해보세요.",
-      tag: [
-        "맛있는 음식 먹기",
-        "영화,드라마,예능보기",
-        "그림그리기",
-        "색칠하기",
-        "식물키우기",
-        "여행가기",
-        "음악,라디오듣기",
-        "쇼핑하기",
-      ],
+      text: "나를 위한 즐거운 시간 만들기",
+      tag: ["맛있는 음식", "영화·드라마", "그림그리기", "음악 듣기"],
       src: ImageSrc3,
+      color: "from-pink-500/80 to-rose-600/80",
     },
     {
       title: "건강",
-      text: "더 단단한 나를 만드는 4가지 일상 실천 콘텐츠를 확인해보세요.",
-      tag: [
-        "스트레칭 하기",
-        "운동하기",
-        "댄스 춤추기",
-        "건강식품 섭취하기",
-        "체중조절하기",
-      ],
+      text: "몸과 마음의 균형 찾기",
+      tag: ["스트레칭", "운동하기", "건강식품", "체중조절"],
       src: ImageSrc4,
+      color: "from-emerald-500/80 to-teal-600/80",
     },
-  ];
-
-  // 사용자의 로그인 상태를 확인하기 위해 isLoggedIn 변수를 추가
-  const isLoggedIn = !!sessionStorage.getItem("token");
+  ]
 
   return (
     <>
       {/* 카드 컨텐츠 섹션 */}
-      <section className="py-16 flex justify-center bg-white">
-        <div className="max-w-[1140px] w-full">
-          <h2
-            className="text-center text-blue-950 text-4xl font-extrabold font-plus-jakarta-sans
-          dark:text-white  leading-10 mb-4"
+      <section className="py-12 sm:py-16 lg:py-20 bg-background">
+        <div className="container mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
+          {/* 섹션 헤더 */}
+          <motion.div
+            className="text-center mb-8 sm:mb-12"
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.5 }}
           >
-            마음돌봄 머글을 위한 루틴추천
-          </h2>
-          <p className="text-sm text-scampi-500 dark:text-slate-500 mb-8 text-center">
-            감정 기록을 바탕으로 요즘 나에게 필요한 감정 돌봄 습관과
-            <br />
-            자기돌봄 루틴 콘텐츠를 추천해드릴게요.
-          </p>
-          <div className="grid grid-cols-2 gap-[26px]">
+            <Badge variant="violet" className="mb-4">
+              <Sparkles className="w-3 h-3 mr-1" />
+              맞춤 루틴 추천
+            </Badge>
+            <h2 className="text-2xl sm:text-3xl lg:text-4xl font-extrabold text-foreground mb-3 sm:mb-4">
+              마음돌봄을 위한 루틴추천
+            </h2>
+            <p className="text-sm sm:text-base text-muted-foreground max-w-md mx-auto">
+              감정 기록을 바탕으로 요즘 나에게 필요한
+              <br className="sm:hidden" />
+              자기돌봄 루틴 콘텐츠를 추천해드릴게요.
+            </p>
+          </motion.div>
+
+          {/* 카드 그리드 */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
             {cardContents.map((content, index) => (
-              <Card
+              <motion.div
                 key={index}
-                title={content.title}
-                text={content.text}
-                tag={content.tag}
-                src={content.src}
-              />
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.5, delay: index * 0.1 }}
+              >
+                <Card
+                  title={content.title}
+                  text={content.text}
+                  tag={content.tag}
+                  src={content.src}
+                  color={content.color}
+                />
+              </motion.div>
             ))}
           </div>
         </div>
       </section>
 
-      {/* 매글에서 지금 바로 시작해보세요 섹션 */}
-      <section className="w-full flex justify-center items-center py-16 bg-white">
-        <div className="Cta2 max-w-[1140px] mx-auto justify-center items-start flex">
-          <div className="Contain grow shrink basis-0 h-20 justify-center items-center gap-10 flex">
-            <span
-              className="text-blue-950 text-4xl font-extrabold font-plus-jakarta-sans 
-            dark:text-white leading-10"
-            >
-              나를 돌보는 하루 5분 마음챙김
-              <br />
-              매글에서 지금 바로 시작해보세요.
-            </span>
-            <div className="bg-white grow shrink basis-0 h-14 justify-end items-center gap-4 flex">
-              <Link to={isLoggedIn ? "/mainsignup" : "/mainsignup"}>
-                <div
-                  className="Button flex border border-indigo-600 rounded-xl justify-center items-center gap-2.5 "
-                  style={{ width: "171px", height: "56px" }}
+      {/* CTA 섹션 */}
+      <section className="py-12 sm:py-16 lg:py-20 bg-gradient-to-br from-primary/5 via-violet-500/5 to-background">
+        <div className="container mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
+          <motion.div
+            className={cn(
+              "relative overflow-hidden",
+              "bg-gradient-to-r from-primary to-violet-600",
+              "rounded-2xl sm:rounded-3xl",
+              "p-6 sm:p-8 lg:p-12",
+              "shadow-xl shadow-primary/20"
+            )}
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.5 }}
+          >
+            {/* 배경 장식 */}
+            <div className="absolute top-0 right-0 w-64 h-64 bg-white/10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2" />
+            <div className="absolute bottom-0 left-0 w-48 h-48 bg-white/10 rounded-full blur-3xl translate-y-1/2 -translate-x-1/2" />
+
+            <div className="relative z-10 flex flex-col lg:flex-row items-center justify-between gap-6 lg:gap-8">
+              {/* 텍스트 */}
+              <div className="text-center lg:text-left">
+                <h3 className="text-xl sm:text-2xl lg:text-3xl font-extrabold text-white leading-tight mb-2">
+                  나를 돌보는 하루 5분 마음챙김
+                </h3>
+                <p className="text-base sm:text-lg lg:text-xl text-white/90 font-medium">
+                  매글에서 지금 바로 시작해보세요.
+                </p>
+              </div>
+
+              {/* 버튼 그룹 */}
+              <div className="flex flex-col sm:flex-row items-center gap-3 sm:gap-4 w-full sm:w-auto">
+                <Button
+                  variant="outline"
+                  size="lg"
+                  className={cn(
+                    "w-full sm:w-auto",
+                    "bg-white/10 border-white/30 text-white",
+                    "hover:bg-white hover:text-primary",
+                    "backdrop-blur-sm"
+                  )}
+                  asChild
                 >
-                  <div
-                    className="Text text-indigo-600 text-sm font-bold font-plus-jakarta-sans 
-                  dark:text-white leading-normal "
+                  <Link
+                    to={isAuthenticated ? "/maegeul" : "/mainsignup"}
+                    className="gap-2"
                   >
-                    {isLoggedIn ? "글 쓰러 가기" : "지금 바로 시작하기"}
-                  </div>
-                </div>
-              </Link>
-              <Link to={isLoggedIn ? "/dashboard" : "/mainsignup"}>
-                <div
-                  className="Button bg-indigo-600 rounded-xl flex justify-center items-center gap-2.5"
-                  style={{ width: "171px", height: "56px" }}
+                    <PenLine className="w-4 h-4" />
+                    {isAuthenticated ? "글 쓰러 가기" : "지금 바로 시작하기"}
+                  </Link>
+                </Button>
+
+                <Button
+                  size="lg"
+                  className={cn(
+                    "w-full sm:w-auto",
+                    "bg-white text-primary",
+                    "hover:bg-white/90",
+                    "shadow-lg"
+                  )}
+                  asChild
                 >
-                  <div className="Text text-white text-sm font-bold font-plus-jakarta-sans leading-normal">
-                    {isLoggedIn ? "마이매글" : "회원 가입 하기"}
-                  </div>
-                </div>
-              </Link>
+                  <Link
+                    to={isAuthenticated ? "/dashboard" : "/mainsignup"}
+                    className="gap-2"
+                  >
+                    {isAuthenticated ? (
+                      <>
+                        <LayoutDashboard className="w-4 h-4" />
+                        마이매글
+                      </>
+                    ) : (
+                      <>
+                        <ArrowRight className="w-4 h-4" />
+                        회원가입 하기
+                      </>
+                    )}
+                  </Link>
+                </Button>
+              </div>
             </div>
-          </div>
+          </motion.div>
         </div>
       </section>
     </>
-  );
-};
-
-interface CardProps {
-  title: string;
-  text: string;
-  tag: string[];
-  src: string;
+  )
 }
 
-const Card: React.FC<CardProps> = ({ title, text, tag, src }) => {
+interface CardProps {
+  title: string
+  text: string
+  tag: string[]
+  src: string
+  color: string
+}
+
+const Card: React.FC<CardProps> = ({ title, text, tag, src, color }) => {
   return (
-    <div className="w-[553px] h-[293px] relative group overflow-hidden rounded-md">
+    <div
+      className={cn(
+        "relative group overflow-hidden rounded-xl sm:rounded-2xl",
+        "aspect-[16/10] sm:aspect-[16/9]",
+        "cursor-pointer"
+      )}
+    >
+      {/* 배경 이미지 */}
       <div
         className="absolute inset-0 bg-cover bg-center transition-transform duration-500 group-hover:scale-110"
         style={{ backgroundImage: `url(${src})` }}
       />
-      <div className="absolute inset-0 bg-black bg-opacity-50 transition-opacity duration-500 group-hover:opacity-0" />
-      <div className="absolute inset-0 flex flex-col justify-between p-6 text-white transition-opacity duration-500 group-hover:opacity-0">
-        <div>
-          <h3 className="text-xl font-bold mb-2">{title}</h3>
-          <p className="text-sm">{text}</p>
-        </div>
-        <button className="self-start text-lg py-2 px-6 rounded-full mt-4 hover:bg-white hover:text-black transition-colors duration-300">
-          Learn more
-          <img
-            src={ArrowPurple}
-            alt="Arrow Icon"
-            className="inline-block ml-2 w-4 h-4"
-          />
-        </button>
+
+      {/* 기본 오버레이 */}
+      <div
+        className={cn(
+          "absolute inset-0 bg-gradient-to-t",
+          color,
+          "opacity-70 transition-opacity duration-500 group-hover:opacity-0"
+        )}
+      />
+
+      {/* 기본 콘텐츠 */}
+      <div className="absolute inset-0 flex flex-col justify-end p-4 sm:p-6 text-white transition-opacity duration-500 group-hover:opacity-0">
+        <h3 className="text-lg sm:text-xl font-bold mb-1">{title}</h3>
+        <p className="text-xs sm:text-sm text-white/90">{text}</p>
       </div>
-      <div className="absolute inset-0 flex flex-col justify-between p-6 bg-fecaca text-scampi-900 opacity-0 transition-opacity duration-500 group-hover:opacity-100">
+
+      {/* 호버 오버레이 */}
+      <div
+        className={cn(
+          "absolute inset-0",
+          "bg-white/95 dark:bg-gray-900/95",
+          "opacity-0 transition-opacity duration-500 group-hover:opacity-100"
+        )}
+      />
+
+      {/* 호버 콘텐츠 */}
+      <div className="absolute inset-0 flex flex-col justify-between p-4 sm:p-6 opacity-0 transition-opacity duration-500 group-hover:opacity-100">
         <div>
-          <h3 className="text-xl font-bold mb-2">{title}</h3>
-          <div className="flex flex-wrap gap-2">
+          <h3 className="text-lg sm:text-xl font-bold text-foreground mb-3">
+            {title}
+          </h3>
+          <div className="flex flex-wrap gap-1.5 sm:gap-2">
             {tag.map((t, index) => (
-              <span
+              <Badge
                 key={index}
-                className="text-xs bg-white py-1 px-3 rounded-full"
+                variant="secondary"
+                className="text-xs font-normal"
               >
                 {t}
-              </span>
+              </Badge>
             ))}
           </div>
         </div>
-        <button className="self-start text-lg py-2 px-6 rounded-lg mt-4 bg-white text-scampi-900 hover:bg-indigo-600 hover:text-white transition-colors duration-300">
+
+        <Button variant="violet" size="sm" className="self-start gap-2 mt-4">
           콘텐츠 탐색하기
-          <img
-            src={ArrowPurple}
-            alt="Arrow Icon"
-            className="inline-block ml-2 w-4 h-4"
-          />
-        </button>
+          <ArrowRight className="w-3 h-3" />
+        </Button>
       </div>
     </div>
-  );
-};
+  )
+}
 
-export default Contents;
+export default Contents

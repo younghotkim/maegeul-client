@@ -1,77 +1,132 @@
-import React from "react";
-import { useNavigate } from "react-router-dom";
+import React from "react"
+import { useNavigate } from "react-router-dom"
+import { motion, AnimatePresence } from "framer-motion"
+import { Button } from "@/components/ui/button"
+import { cn } from "@/lib/utils"
+import { X, Home, LayoutDashboard, Sparkles, Mail } from "lucide-react"
 
 interface SaveModalProps {
-  isOpen: boolean;
-  onClose: () => void;
+  isOpen: boolean
+  onClose: () => void
 }
 
 const SaveModal: React.FC<SaveModalProps> = ({ isOpen, onClose }) => {
-  const navigate = useNavigate();
+  const navigate = useNavigate()
 
-  // 대시보드로 이동
   const goToDashboard = () => {
-    navigate("/dashboard");
-    onClose();
-  };
+    navigate("/dashboard")
+    onClose()
+  }
 
-  // 홈으로 이동
   const goToHome = () => {
-    navigate("/home");
-    onClose();
-  };
+    navigate("/home")
+    onClose()
+  }
 
-  if (!isOpen) return null; // 모달이 열리지 않은 경우 렌더링하지 않음
+  if (!isOpen) return null
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center">
-      <div className="bg-white w-[600px] h-[300px] p-6 rounded-lg shadow-lg relative">
-        {/* 닫기 버튼 (오른쪽 위) */}
-        <button
-          className="absolute top-4 right-4 text-gray-400 hover:text-gray-600"
+    <AnimatePresence>
+      <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+        {/* Backdrop */}
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          className="absolute inset-0 bg-black/60 backdrop-blur-sm"
           onClick={onClose}
+        />
+
+        {/* Modal */}
+        <motion.div
+          initial={{ opacity: 0, scale: 0.95, y: 20 }}
+          animate={{ opacity: 1, scale: 1, y: 0 }}
+          exit={{ opacity: 0, scale: 0.95, y: 20 }}
+          transition={{ duration: 0.3 }}
+          className={cn(
+            "relative z-10 w-full max-w-md",
+            "bg-card rounded-2xl shadow-2xl",
+            "overflow-hidden"
+          )}
+          onClick={(e) => e.stopPropagation()}
         >
-          &times;
-        </button>
+          {/* 상단 장식 */}
+          <div className="h-1.5 bg-gradient-to-r from-primary via-violet-500 to-primary" />
 
-        {/* 모달 제목 */}
-        <h2
-          className="text-2xl font-extrabold mb-4 text-center mt-10"
-          style={{ color: "#7551FF" }}
-        >
-          AI무디타의 편지가 저장되었습니다!
-        </h2>
-
-        {/* 모달 본문 */}
-        <p className="text-xl text-gray-700 mb-6 font-bold text-center">
-          매글과 함께 마음지도를 채워가보세요 ✨
-        </p>
-
-        {/* 버튼 그룹 */}
-        <div className="flex justify-center space-x-4 mt-12">
-          {/* 홈으로 이동 버튼 */}
+          {/* 닫기 버튼 */}
           <button
-            onClick={goToHome}
-            className="px-6 py-2 rounded bg-indigo-600 text-white hover:bg-indigo-700"
-            style={{ backgroundColor: "#7551FF" }}
+            onClick={onClose}
+            className={cn(
+              "absolute top-4 right-4 p-2 rounded-full",
+              "text-muted-foreground hover:text-foreground",
+              "hover:bg-muted transition-colors"
+            )}
           >
-            홈
+            <X size={18} />
           </button>
 
-          {/* 대시보드로 이동 버튼 */}
-          <button
-            onClick={goToDashboard}
-            className="px-6 py-2 rounded bg-indigo-600 text-white hover:bg-indigo-700"
-            style={{ backgroundColor: "#7551FF" }}
-          >
-            마이매글
-          </button>
-        </div>
+          {/* 내용 */}
+          <div className="p-6 sm:p-8 text-center">
+            {/* 아이콘 */}
+            <motion.div
+              initial={{ scale: 0, rotate: -180 }}
+              animate={{ scale: 1, rotate: 0 }}
+              transition={{ delay: 0.2, type: "spring", stiffness: 200 }}
+              className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-primary/10 mb-4"
+            >
+              <Mail className="w-8 h-8 text-primary" />
+            </motion.div>
+
+            {/* 제목 */}
+            <motion.h2
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.3 }}
+              className="text-xl sm:text-2xl font-bold text-primary mb-2"
+            >
+              AI무디타의 편지가 저장되었습니다!
+            </motion.h2>
+
+            {/* 설명 */}
+            <motion.p
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.4 }}
+              className="text-muted-foreground mb-6 flex items-center justify-center gap-1"
+            >
+              매글과 함께 마음지도를 채워가보세요
+              <Sparkles className="w-4 h-4 text-yellow-500" />
+            </motion.p>
+
+            {/* 버튼 그룹 */}
+            <motion.div
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.5 }}
+              className="flex flex-col sm:flex-row gap-3 justify-center"
+            >
+              <Button
+                onClick={goToHome}
+                variant="outline"
+                className="gap-2"
+              >
+                <Home className="w-4 h-4" />
+                홈으로
+              </Button>
+              <Button
+                onClick={goToDashboard}
+                variant="violet"
+                className="gap-2"
+              >
+                <LayoutDashboard className="w-4 h-4" />
+                마이매글
+              </Button>
+            </motion.div>
+          </div>
+        </motion.div>
       </div>
-    </div>
-  );
-};
+    </AnimatePresence>
+  )
+}
 
-export default SaveModal;
-
-export {};
+export default SaveModal

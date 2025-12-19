@@ -1,56 +1,89 @@
-import React from "react";
-import { Link } from "react-router-dom"; // react-router-dom for navigation
-import { Iconify } from "../dashboardComponents/iconify"; // Iconify import for icons
-import mainLogo from "../logo/main_logo.png"; // Logo image
+import React, { useEffect } from "react"
+import { Link } from "react-router-dom"
+import { X } from "lucide-react"
+import mainLogo from "../logo/main_logo.png"
+import { Button } from "@/components/ui/button"
+import { cn } from "@/lib/utils"
 
 interface ModalProps {
-  isOpen: boolean;
-  message: React.ReactNode; // Accept any valid React node as the message
-  onClose: () => void;
+  isOpen: boolean
+  message: React.ReactNode
+  onClose: () => void
 }
 
 const Modal: React.FC<ModalProps> = ({ isOpen, message, onClose }) => {
-  if (!isOpen) return null; // If modal is not open, don't render anything
+  // ESC 키로 모달 닫기
+  useEffect(() => {
+    const handleEsc = (e: KeyboardEvent) => {
+      if (e.key === "Escape") onClose()
+    }
+    if (isOpen) {
+      document.addEventListener("keydown", handleEsc)
+      document.body.style.overflow = "hidden"
+    }
+    return () => {
+      document.removeEventListener("keydown", handleEsc)
+      document.body.style.overflow = "unset"
+    }
+  }, [isOpen, onClose])
+
+  if (!isOpen) return null
 
   return (
-    <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
-      <div className="bg-white p-8 rounded-lg shadow-lg max-w-md w-full text-center font-medium font-plus-jakarta-sans relative">
-        {/* Main Logo at the top */}
-        <img
-          src={mainLogo}
-          className="w-24 h-24 mx-auto mb-4"
-          alt="Main Logo"
-        />
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center"
+      onClick={onClose}
+    >
+      {/* Backdrop */}
+      <div className="absolute inset-0 bg-black/60 backdrop-blur-sm animate-in fade-in duration-200" />
 
-        {/* Message Section */}
-        <div className="text-xl font-bold mb-6">{message}</div>
-
-        {/* Buttons Section */}
-        <div className="flex justify-center space-x-4 mt-6">
-          <Link
-            to="/mainlogin"
-            className="px-6 py-3 border border-indigo-600 rounded-lg text-indigo-600 text-sm font-bold hover:bg-indigo-100 hover:shadow-lg"
-          >
-            로그인
-          </Link>
-          <Link
-            to="/mainsignup"
-            className="px-6 py-3 bg-indigo-600 text-white text-sm font-bold rounded-lg hover:bg-indigo-500 hover:shadow-lg"
-          >
-            회원가입
-          </Link>
-        </div>
-
-        {/* Close button in the top-right corner */}
+      {/* Modal Content */}
+      <div
+        className={cn(
+          "relative z-10 w-full max-w-md mx-4",
+          "bg-card rounded-2xl shadow-2xl",
+          "p-8 text-center font-plus-jakarta-sans",
+          "animate-in zoom-in-95 fade-in duration-200"
+        )}
+        onClick={(e) => e.stopPropagation()}
+      >
+        {/* Close button */}
         <button
           onClick={onClose}
-          className="absolute top-2 right-2 text-gray-500 hover:text-gray-700"
+          className={cn(
+            "absolute top-4 right-4 p-1 rounded-full",
+            "text-muted-foreground hover:text-foreground",
+            "hover:bg-muted transition-colors"
+          )}
+          aria-label="닫기"
         >
-          <Iconify icon="ic:round-close" width={24} height={24} />
+          <X size={20} />
         </button>
+
+        {/* Logo */}
+        <div className="mb-6">
+          <img
+            src={mainLogo}
+            className="w-20 h-20 mx-auto drop-shadow-lg"
+            alt="Maegeul Logo"
+          />
+        </div>
+
+        {/* Message */}
+        <p className="text-lg font-semibold text-foreground mb-8">{message}</p>
+
+        {/* Buttons */}
+        <div className="flex justify-center gap-3">
+          <Button variant="violet-outline" size="lg" asChild>
+            <Link to="/mainlogin">로그인</Link>
+          </Button>
+          <Button variant="violet" size="lg" asChild>
+            <Link to="/mainsignup">회원가입</Link>
+          </Button>
+        </div>
       </div>
     </div>
-  );
-};
+  )
+}
 
-export default Modal;
+export default Modal

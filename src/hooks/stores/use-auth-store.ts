@@ -13,8 +13,10 @@ interface AuthState {
   user: User | null
   token: string | null
   isAuthenticated: boolean
+  isInitialized: boolean // 초기화 완료 여부
   setUser: (user: User | null) => void
   setToken: (token: string | null) => void
+  setInitialized: (value: boolean) => void
   logout: () => void
 }
 
@@ -22,28 +24,30 @@ export const useAuthStore = create<AuthState>()(
   persist(
     (set) => ({
       user: null,
-      token: localStorage.getItem('token'),
-      isAuthenticated: !!localStorage.getItem('token'),
+      token: null,
+      isAuthenticated: false,
+      isInitialized: false,
 
       setUser: (user) => set({ user, isAuthenticated: !!user }),
 
       setToken: (token) => {
-        if (token) {
-          localStorage.setItem('token', token)
-        } else {
-          localStorage.removeItem('token')
-        }
         set({ token, isAuthenticated: !!token })
       },
 
+      setInitialized: (value) => set({ isInitialized: value }),
+
       logout: () => {
-        localStorage.removeItem('token')
         set({ user: null, token: null, isAuthenticated: false })
       },
     }),
     {
       name: 'auth-storage',
-      partialize: (state) => ({ token: state.token }), // 토큰만 persist
+      // 토큰과 사용자 정보 모두 persist
+      partialize: (state) => ({ 
+        token: state.token,
+        user: state.user,
+        isAuthenticated: state.isAuthenticated,
+      }),
     }
   )
 )

@@ -3,8 +3,9 @@ import type { ChartOptions } from "../../dashboardComponents/chart";
 
 import Card from "@mui/material/Card";
 import Divider from "@mui/material/Divider";
-import { useTheme } from "@mui/material/styles";
+import { useTheme, alpha } from "@mui/material/styles";
 import CardHeader from "@mui/material/CardHeader";
+import Box from "@mui/material/Box";
 
 import { fNumber } from "../../utils/format-number";
 
@@ -35,43 +36,82 @@ export function AnalyticsCurrentVisits({
 
   const chartSeries = chart.series.map((item) => item.value);
 
+  // 개선된 그라데이션 색상 팔레트
   const chartColors = chart.colors ?? [
-    "#6AD2FF", // 원하는 색상 (예: 파란색)
-    "#FFDE57", // 원하는 색상 (예: 노란색)
-    "#35D28A", // 원하는 색상 (예: 초록색)
-    "#EE5D50", // 원하는 색상 (예: 빨간색)
+    "#667eea", // 보라-파랑
+    "#f5576c", // 핑크-레드
+    "#4facfe", // 하늘색
+    "#fa709a", // 핑크
+    "#38ef7d", // 민트
+    "#fee140", // 노랑
   ];
 
   const chartOptions = useChart({
     chart: { sparkline: { enabled: true } },
     colors: chartColors,
     labels: chart.series.map((item) => item.label),
-    stroke: { width: 0 },
-    dataLabels: { enabled: true, dropShadow: { enabled: false } },
+    stroke: { width: 2, colors: ["#fff"] },
+    dataLabels: {
+      enabled: true,
+      dropShadow: { enabled: false },
+      style: {
+        fontSize: "12px",
+        fontWeight: 600,
+      },
+    },
     tooltip: {
       y: {
         formatter: (value: number) => fNumber(value),
         title: { formatter: (seriesName: string) => `${seriesName}` },
       },
     },
-    plotOptions: { pie: { donut: { labels: { show: false } } } },
+    plotOptions: {
+      pie: {
+        donut: { labels: { show: false } },
+        expandOnClick: true,
+      },
+    },
     ...chart.options,
   });
 
   return (
-    <Card {...other}>
-      <CardHeader title={title} subheader={subheader} />
-
-      <Chart
-        type="pie"
-        series={chartSeries}
-        options={chartOptions}
-        width={{ xs: 240, xl: 260 }}
-        height={{ xs: 240, xl: 260 }}
-        sx={{ my: 6, mx: "auto" }}
+    <Card
+      sx={{
+        borderRadius: 3,
+        boxShadow: `0 4px 20px ${alpha(theme.palette.grey[500], 0.12)}`,
+        transition: "all 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
+        "&:hover": {
+          boxShadow: `0 8px 24px ${alpha(theme.palette.grey[500], 0.16)}`,
+        },
+      }}
+      {...other}
+    >
+      <CardHeader
+        title={title}
+        subheader={subheader}
+        titleTypographyProps={{
+          sx: {
+            fontWeight: 700,
+            background: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
+            backgroundClip: "text",
+            WebkitBackgroundClip: "text",
+            WebkitTextFillColor: "transparent",
+          },
+        }}
       />
 
-      <Divider sx={{ borderStyle: "dashed" }} />
+      <Box sx={{ position: "relative" }}>
+        <Chart
+          type="pie"
+          series={chartSeries}
+          options={chartOptions}
+          width={{ xs: 240, xl: 260 }}
+          height={{ xs: 240, xl: 260 }}
+          sx={{ my: 6, mx: "auto" }}
+        />
+      </Box>
+
+      <Divider sx={{ borderStyle: "dashed", borderColor: alpha(theme.palette.grey[500], 0.2) }} />
 
       <ChartLegends
         labels={chartOptions?.labels}

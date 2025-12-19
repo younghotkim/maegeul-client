@@ -10,6 +10,8 @@ import TimelineContent from "@mui/lab/TimelineContent";
 import TimelineSeparator from "@mui/lab/TimelineSeparator";
 import TimelineConnector from "@mui/lab/TimelineConnector";
 import TimelineItem, { timelineItemClasses } from "@mui/lab/TimelineItem";
+import { alpha, useTheme } from "@mui/material/styles";
+import Box from "@mui/material/Box";
 
 // ----------------------------------------------------------------------
 
@@ -30,14 +32,22 @@ export function AnalyticsOrderTimeline({
   list,
   ...other
 }: Props) {
+  const theme = useTheme();
+
   return (
     <Card
       {...other}
       sx={{
-        height: { xs: "350px", sm: "380px", md: "400px" }, // 반응형 높이
+        height: { xs: "350px", sm: "380px", md: "400px" },
         display: "flex",
         flexDirection: "column",
         width: "100%",
+        borderRadius: 3,
+        boxShadow: `0 4px 20px ${alpha(theme.palette.grey[500], 0.12)}`,
+        transition: "all 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
+        "&:hover": {
+          boxShadow: `0 8px 24px ${alpha(theme.palette.grey[500], 0.16)}`,
+        },
       }}
     >
       <CardHeader
@@ -46,11 +56,15 @@ export function AnalyticsOrderTimeline({
         sx={{
           px: { xs: 2, sm: 3 },
           py: { xs: 1.5, sm: 2 },
-          "& .MuiCardHeader-title": {
+        }}
+        titleTypographyProps={{
+          sx: {
+            fontWeight: 700,
             fontSize: { xs: "1rem", sm: "1.25rem", md: "1.5rem" },
-          },
-          "& .MuiCardHeader-subheader": {
-            fontSize: { xs: "0.75rem", sm: "0.875rem" },
+            background: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
+            backgroundClip: "text",
+            WebkitBackgroundClip: "text",
+            WebkitTextFillColor: "transparent",
           },
         }}
       />
@@ -67,12 +81,12 @@ export function AnalyticsOrderTimeline({
           },
         }}
       >
-        {/* list의 처음 5개의 항목만 가져옴 */}
         {list.slice(0, 4).map((item, index) => (
           <Item
             key={item.id}
             item={item}
-            lastItem={index === list.length - 1}
+            lastItem={index === Math.min(list.length, 4) - 1}
+            index={index}
           />
         ))}
       </Timeline>
@@ -85,27 +99,52 @@ export function AnalyticsOrderTimeline({
 type ItemProps = TimelineItemProps & {
   lastItem: boolean;
   item: Props["list"][number];
+  index: number;
 };
 
-function Item({ item, lastItem, ...other }: ItemProps) {
+function Item({ item, lastItem, index, ...other }: ItemProps) {
+  const theme = useTheme();
+
   return (
-    <TimelineItem {...other}>
+    <TimelineItem
+      {...other}
+      sx={{
+        "&:hover": {
+          "& .timeline-content": {
+            backgroundColor: alpha(theme.palette.primary.main, 0.04),
+            borderRadius: 1,
+          },
+        },
+      }}
+    >
       <TimelineSeparator>
-        {/* item.type에 저장된 색상 코드를 사용하여 동적 스타일링 */}
         <TimelineDot
           sx={{
             backgroundColor: item.type,
-            width: { xs: 32, sm: 36, md: 40 },
-            height: { xs: 32, sm: 36, md: 40 },
+            width: { xs: 16, sm: 18, md: 20 },
+            height: { xs: 16, sm: 18, md: 20 },
+            boxShadow: `0 4px 12px ${alpha(item.type, 0.4)}`,
+            border: `2px solid ${alpha("#fff", 0.8)}`,
           }}
         />
-        {lastItem ? null : <TimelineConnector />}
+        {lastItem ? null : (
+          <TimelineConnector
+            sx={{
+              background: `linear-gradient(180deg, ${item.type} 0%, ${alpha(
+                theme.palette.grey[300],
+                0.5
+              )} 100%)`,
+            }}
+          />
+        )}
       </TimelineSeparator>
 
       <TimelineContent
+        className="timeline-content"
         sx={{
           px: { xs: 1.5, sm: 2 },
-          py: { xs: 0.5, sm: 1 },
+          py: { xs: 0.75, sm: 1 },
+          transition: "all 0.2s ease",
         }}
       >
         <Typography
@@ -114,6 +153,7 @@ function Item({ item, lastItem, ...other }: ItemProps) {
             fontSize: { xs: "0.875rem", sm: "0.9375rem", md: "1rem" },
             lineHeight: { xs: 1.4, sm: 1.5 },
             wordBreak: "break-word",
+            fontWeight: 600,
           }}
         >
           {item.title}

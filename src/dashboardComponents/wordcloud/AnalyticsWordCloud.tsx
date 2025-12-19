@@ -6,20 +6,21 @@ import {
   Divider,
   CardProps,
   Box,
+  Typography,
 } from "@mui/material";
-import D3WordCloud from "../../layouts/d3/D3WordCloud"; // D3WordCloud 컴포넌트
-import { useAuthStore } from "../../hooks/stores/use-auth-store"; // Store 사용
-import useUserMoodData from "../../hooks/useUserMoodData"; // useUserMoodData 훅 임포트
+import { alpha, useTheme } from "@mui/material/styles";
+import D3WordCloud from "../../layouts/d3/D3WordCloud";
+import { useAuthStore } from "../../hooks/stores/use-auth-store";
+import useUserMoodData from "../../hooks/useUserMoodData";
 import { ChartLegends } from "../chart/chart-legends";
+import { Cloud, Sparkles } from "lucide-react";
 
-// Word 타입 정의 (size와 color 포함)
 type Word = {
   text: string;
   size: number;
   color: string;
 };
 
-// ChartOptions 타입 정의
 export type ChartOptions = {
   labels?: string[];
   colors?: string[];
@@ -27,10 +28,9 @@ export type ChartOptions = {
   type?: string;
 };
 
-// Chart에 기본 옵션을 추가
 const chartOptions: ChartOptions = {
-  labels: ["편안 지수가 높은 단어들이 더 크게 보여요"], // 원하는 라벨 추가
-  colors: ["#B9A2FF"], // 색상 커스텀
+  labels: ["편안 지수가 높은 단어들이 더 크게 보여요"],
+  colors: ["#667eea"],
 };
 
 interface AnalyticsWordCloudProps {
@@ -41,14 +41,14 @@ const AnalyticsWordCloud: React.FC<AnalyticsWordCloudProps> = ({
   title,
   ...other
 }) => {
-  const user = useAuthStore((state) => state.user); // Store에서 user 가져오기
-  const moodData = useUserMoodData(user?.user_id || undefined); // 이미 매칭된 데이터를 가져옴
+  const theme = useTheme();
+  const user = useAuthStore((state) => state.user);
+  const moodData = useUserMoodData(user?.user_id || undefined);
 
-  // API에서 받은 라벨을 D3WordCloud에서 요구하는 형식으로 변환
   const words: Word[] = moodData.map((mood) => ({
-    text: mood.label, // 감정 라벨
-    size: mood.pleasantness * 5, // pleasantness를 기반으로 크기 설정
-    color: mood.color, // 매칭된 색상
+    text: mood.label,
+    size: mood.pleasantness * 5,
+    color: mood.color,
   }));
 
   return (
@@ -58,19 +58,30 @@ const AnalyticsWordCloud: React.FC<AnalyticsWordCloudProps> = ({
         display: "flex",
         flexDirection: "column",
         height: "100%",
-        // 모바일: 전체 너비, 태블릿 이상: 자동
         width: { xs: "100%", sm: "auto" },
+        borderRadius: 3,
+        boxShadow: `0 4px 20px ${alpha(theme.palette.grey[500], 0.12)}`,
+        transition: "all 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
+        "&:hover": {
+          boxShadow: `0 8px 24px ${alpha(theme.palette.grey[500], 0.16)}`,
+        },
       }}
     >
       <CardHeader
         title={title}
         sx={{
-          // 모바일: 작은 폰트 크기
-          "& .MuiCardHeader-title": {
-            fontSize: { xs: "1rem", sm: "1.25rem", md: "1.5rem" },
-          },
           px: { xs: 2, sm: 3 },
           py: { xs: 1.5, sm: 2 },
+        }}
+        titleTypographyProps={{
+          sx: {
+            fontWeight: 700,
+            fontSize: { xs: "1rem", sm: "1.25rem", md: "1.5rem" },
+            background: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
+            backgroundClip: "text",
+            WebkitBackgroundClip: "text",
+            WebkitTextFillColor: "transparent",
+          },
         }}
       />
       <CardContent
@@ -83,12 +94,11 @@ const AnalyticsWordCloud: React.FC<AnalyticsWordCloudProps> = ({
           py: { xs: 1, sm: 2 },
         }}
       >
-        {/* 필터링된 데이터를 기반으로 워드 클라우드 렌더링 */}
         {words.length > 0 ? (
           <Box
             sx={{
               width: "100%",
-              height: { xs: "250px", sm: "300px", md: "356px" }, // 반응형 높이
+              height: { xs: "250px", sm: "300px", md: "356px" },
               minHeight: { xs: "250px", sm: "300px", md: "356px" },
             }}
           >
@@ -99,15 +109,53 @@ const AnalyticsWordCloud: React.FC<AnalyticsWordCloudProps> = ({
             sx={{
               textAlign: "center",
               px: { xs: 2, sm: 3 },
-              fontSize: { xs: "0.875rem", sm: "1rem" },
+              py: 4,
             }}
           >
-            지금 매글을 시작해서 나만의 감정 어휘 클라우드를 만들어보세요 🎈
+            <Box
+              sx={{
+                width: 64,
+                height: 64,
+                borderRadius: "16px",
+                background: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                mx: "auto",
+                mb: 2,
+                boxShadow: "0 8px 16px rgba(102, 126, 234, 0.3)",
+              }}
+            >
+              <Cloud size={32} color="white" />
+            </Box>
+            <Typography
+              variant="body1"
+              sx={{
+                color: "text.secondary",
+                fontWeight: 500,
+              }}
+            >
+              지금 매글을 시작해서
+            </Typography>
+            <Typography
+              variant="body1"
+              sx={{
+                color: "text.secondary",
+                fontWeight: 500,
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                gap: 0.5,
+              }}
+            >
+              나만의 감정 어휘 클라우드를 만들어보세요
+              <Sparkles size={16} color="#667eea" />
+            </Typography>
           </Box>
         )}
       </CardContent>
 
-      <Divider sx={{ borderStyle: "dashed" }} />
+      <Divider sx={{ borderStyle: "dashed", borderColor: alpha(theme.palette.grey[500], 0.2) }} />
 
       <ChartLegends
         labels={chartOptions?.labels}

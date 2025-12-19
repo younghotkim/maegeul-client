@@ -1,75 +1,82 @@
-import { useEffect } from "react";
-import { useLocation, useNavigate } from "react-router-dom";
-import { useAuthStore } from "../../hooks/stores/use-auth-store";
-import axios from "axios";
-
-// 환경 변수에서 API URL을 가져옴
-const getAPIURL = () => {
-  const envUrl = import.meta.env.VITE_API_URL;
-
-  // 환경 변수가 있고, placeholder가 아니고, 유효한 URL인 경우에만 사용
-  if (
-    envUrl &&
-    !envUrl.includes("YOUR_SERVER_IP") &&
-    envUrl.startsWith("http")
-  ) {
-    return envUrl.replace(/\/api$/, ""); // /api 제거 (이미 포함되어 있을 수 있음)
-  }
-
-  // 환경 변수가 없으면 에러
-  console.error("❌ VITE_API_URL 환경 변수가 설정되지 않았습니다.");
-  console.error("개발 환경에서는 .env 파일에 VITE_API_URL을 설정하세요.");
-  console.error("프로덕션 환경에서는 Vercel 환경 변수를 확인하세요.");
-  throw new Error(
-    "VITE_API_URL 환경 변수가 필요합니다. .env 파일 또는 Vercel 환경 변수를 확인하세요."
-  );
-};
-
-const API_URL = getAPIURL();
+import { useEffect, useState } from "react"
+import { useLocation, useNavigate } from "react-router-dom"
+import { useAuthStore } from "../../hooks/stores/use-auth-store"
+import { apiClient } from "../../lib/api-client"
+import { LoadingScreen } from "@/components/ui/spinner"
+import { AlertCircle } from "lucide-react"
 
 const KakaoCallback = () => {
-  const location = useLocation();
-  const { setUser, setToken } = useAuthStore();
-  const navigate = useNavigate();
+  const location = useLocation()
+  const { setUser, setToken, setInitialized } = useAuthStore()
+  const navigate = useNavigate()
+  const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
-    console.log("location.search: ", location.search); // URL 파라미터 출력
+    const handleKakaoCallback = async () => {
+      const queryParams = new URLSearchParams(location.search)
+      const token = queryParams.get("token")
+      const userId = queryParams.get("userId")
+      const errorParam = queryParams.get("error")
 
-    const queryParams = new URLSearchParams(location.search);
-    const token = queryParams.get("token");
-    const userId = queryParams.get("userId");
+      if (errorParam) {
+        setError("카카오 로그인에 실패했습니다.")
+        setTimeout(() => navigate("/mainlogin"), 2000)
+        return
+      }
 
-    if (token && userId) {
-      // Store에 토큰 저장
-      setToken(token);
+      if (!token || !userId) {
+        setError("로그인 정보가 없습니다.")
+        setTimeout(() => navigate("/mainlogin"), 2000)
+        return
+      }
 
-      axios
-        .get(`${API_URL}/api/user/${userId}`, {
-          headers: {
-            Authorization: `Bearer ${token}`, // 백엔드로 토큰을 보내어 검증
-          },
+      try {
+        setToken(token)
+
+        const response = await apiClient.get(`/user/${userId}`, {
+          headers: { Authorization: `Bearer ${token}` },
         })
-        .then((response) => {
-          const { profile_name, profile_picture, email } = response.data.user;
-          // Store에 사용자 정보 저장
-          setUser({
-            user_id: Number(userId),
-            profile_name: profile_name || null,
-            profile_picture: profile_picture || undefined,
-            email: email || null,
-            isKakaoUser: true, // 카카오 사용자 여부 저장
-          });
-          navigate("/"); // 홈으로 리다이렉트
+
+        const userData = response.data.user || response.data
+
+        setUser({
+          user_id: Number(userId),
+          profile_name: userData.profile_name || "",
+          profile_picture: userData.profile_picture || undefined,
+          email: userData.email || "",
+          isKakaoUser: true,
         })
-        .catch((error) => {
-          console.error("사용자 정보를 가져오는데 실패했습니다:", error);
-        });
-    } else {
-      console.log("토큰 또는 userId가 없습니다.");
+
+        setInitialized(true)
+        navigate("/")
+      } catch (err) {
+        console.error("사용자 정보를 가져오는데 실패했습니다:", err)
+        setError("사용자 정보를 가져오는데 실패했습니다.")
+        setInitialized(true)
+        setTimeout(() => navigate("/"), 2000)
+      }
     }
-  }, [location, setUser, setToken, navigate]);
 
-  return <div>카카오 로그인 처리 중...</div>;
-};
+    handleKakaoCallback()
+  }, [location, setUser, setToken, setInitialized, navigate])
 
-export default KakaoCallback;
+  if (error) {
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-background">
+        <div className="text-center space-y-3">
+          <div className="mx-auto w-12 h-12 rounded-full bg-destructive/10 flex items-center justify-center">
+            <AlertCircle className="h-6 w-6 text-destructive" />
+          </div>
+          <p className="text-destructive font-medium">{error}</p>
+          <p className="text-sm text-muted-foreground">
+            잠시 후 로그인 페이지로 이동합니다...
+          </p>
+        </div>
+      </div>
+    )
+  }
+
+  return <LoadingScreen message="카카오 로그인 처리 중..." />
+}
+
+export default KakaoCallback

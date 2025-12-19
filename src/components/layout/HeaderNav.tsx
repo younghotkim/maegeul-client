@@ -1,5 +1,6 @@
-import React from 'react'
-import { Link } from 'react-router-dom'
+import React from "react"
+import { Link } from "react-router-dom"
+import { cn } from "@/lib/utils"
 
 interface NavItem {
   label: string
@@ -17,22 +18,16 @@ interface HeaderNavProps {
 
 const navItems: NavItem[] = [
   {
-    label: '무드 일기',
-    path: '/maegeul',
+    label: "AI 하루진단",
+    path: "/maegeul",
     requiresAuth: true,
-    modalMessage: '무드 일기는 로그인 후 이용 할 수 있어요.',
+    modalMessage: "무드 일기는 로그인 후 이용 할 수 있어요.",
   },
   {
-    label: 'AI 하루진단',
-    path: '/MgWriting',
+    label: "마이매글",
+    path: "/dashboard",
     requiresAuth: true,
-    modalMessage: 'AI하루진단은 로그인 후 이용 할 수 있어요.',
-  },
-  {
-    label: '마이매글',
-    path: '/dashboard',
-    requiresAuth: true,
-    modalMessage: '마이매글은 로그인 후 이용 할 수 있어요.',
+    modalMessage: "마이매글은 로그인 후 이용 할 수 있어요.",
   },
 ]
 
@@ -51,11 +46,14 @@ export function HeaderNav({
   }
 
   const navClassName = isMobile
-    ? 'flex flex-col space-y-4 py-4'
-    : 'hidden md:flex flex-grow justify-center space-x-8 lg:space-x-12 text-sm'
+    ? "flex flex-col space-y-4 py-4"
+    : "hidden md:flex flex-grow justify-center space-x-8 lg:space-x-12 text-sm"
 
-  const linkClassName =
-    'text-blue-950 dark:text-gray-300 hover:text-violet-500 dark:hover:text-violet-400 transition-colors font-medium'
+  const linkClassName = cn(
+    "relative py-2 text-foreground/80 hover:text-primary transition-colors font-medium",
+    "after:absolute after:bottom-0 after:left-0 after:h-0.5 after:w-0 after:bg-primary after:transition-all after:duration-300",
+    "hover:after:w-full"
+  )
 
   return (
     <nav className={navClassName}>
@@ -72,7 +70,7 @@ export function HeaderNav({
         ) : (
           <span
             key={item.label}
-            className={`${linkClassName} cursor-pointer`}
+            className={cn(linkClassName, "cursor-pointer")}
             onClick={() => handleClick(item)}
           >
             {item.label}

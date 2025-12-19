@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React from "react";
 import { motion } from "framer-motion";
 
 interface CustomSliderProps {
@@ -7,74 +7,97 @@ interface CustomSliderProps {
   min: number;
   max: number;
   icon: string;
-  iconSize: number;
+  iconSize?: number;
 }
 
 const CustomSlider: React.FC<CustomSliderProps> = ({
+  value,
   onChange,
   min,
   max,
   icon,
-  iconSize,
+  iconSize = 48,
 }) => {
-  const [value, setValue] = useState(5);
-
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const newValue = Number(e.target.value);
-    setValue(newValue);
     onChange(newValue);
   };
 
   const percentage = ((value - min) / (max - min)) * 100;
 
+  // 색상 그라데이션 (값에 따라 변화)
+  const getTrackColor = () => {
+    if (value <= 3) return "from-blue-400 to-blue-500";
+    if (value <= 5) return "from-blue-400 to-violet-500";
+    if (value <= 7) return "from-violet-400 to-orange-400";
+    return "from-orange-400 to-red-500";
+  };
+
   return (
-    <div className="relative w-[570px] h-24 mx-auto select-none">
-      {/* 슬라이더 배경 */}
-      <div className="absolute w-full h-3 bg-black/10 rounded-full">
+    <div className="relative w-full max-w-[570px] h-24 mx-auto select-none px-4">
+      {/* 슬라이더 트랙 배경 */}
+      <div className="absolute left-4 right-4 top-10 h-3 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden shadow-inner">
+        {/* 활성 트랙 */}
         <motion.div
-          className="h-full bg-violet-300 rounded-full"
-          style={{ width: `${percentage}%` }}
+          className={`h-full bg-gradient-to-r ${getTrackColor()} rounded-full`}
+          initial={false}
           animate={{ width: `${percentage}%` }}
-          transition={{ duration: 0.3, ease: "easeInOut" }} // 애니메이션 부드럽게
+          transition={{ duration: 0.2, ease: "easeOut" }}
         />
       </div>
 
-      {/* Thumb 대신 Slider가 움직임 */}
+      {/* 눈금 표시 */}
+      <div className="absolute left-4 right-4 top-[60px] flex justify-between px-1">
+        {Array.from({ length: max - min + 1 }, (_, i) => (
+          <div
+            key={i}
+            className={`text-xs font-medium transition-colors duration-200 ${
+              i + min === value
+                ? "text-violet-600 dark:text-violet-400 font-bold scale-110"
+                : "text-gray-400 dark:text-gray-500"
+            }`}
+          >
+            {i + min}
+          </div>
+        ))}
+      </div>
+
+      {/* 숨겨진 네이티브 슬라이더 (접근성용) */}
       <input
         type="range"
         min={min}
         max={max}
         value={value}
         onChange={handleChange}
-        className="absolute w-full h-3 appearance-none bg-transparent cursor-pointer"
-        style={{ opacity: 0, zIndex: 1 }} // 기본 슬라이더 숨김
+        className="absolute left-4 right-4 top-8 h-8 appearance-none bg-transparent cursor-pointer z-10 opacity-0"
+        aria-label="슬라이더"
+        aria-valuemin={min}
+        aria-valuemax={max}
+        aria-valuenow={value}
       />
 
-      {/* 아이콘 이미지와 크기 */}
+      {/* 이모지 아이콘 (Thumb 역할) */}
       <motion.div
-        className="absolute transition-all duration-300 ease-out pointer-events-none"
+        className="absolute pointer-events-none"
         style={{
           width: `${iconSize}px`,
           height: `${iconSize}px`,
-          bottom: "1px",
-          left: `calc(${percentage}% - ${iconSize / 2}px)`, // 슬라이더 위치 계산
+          top: `${36 - iconSize / 2}px`,
         }}
-      >
-        <img src={icon} alt="Icon" className="w-full h-full" />
-      </motion.div>
-
-      {/* Thumb에 Value 표시 및 Shadow 효과 추가 */}
-      <motion.div
-        className="absolute w-[60px] h-[60px] bg-violet-300 rounded-full shadow-lg flex items-center justify-center text-white font-bold"
-        style={{ left: `calc(${percentage}% - 30px)`, top: "-25px" }} // 중앙 정렬
-        animate={{ left: `calc(${percentage}% - 30px)` }}
-        transition={{
-          type: "spring",
-          stiffness: 500, // thumb이 빠르게 따라가도록 설정
-          damping: 30, // 스프링 감속
+        initial={false}
+        animate={{
+          left: `calc(${percentage}% - ${iconSize / 2}px + 16px - ${(percentage / 100) * 32}px)`,
         }}
+        transition={{ type: "spring", stiffness: 400, damping: 25 }}
       >
-        {value} {/* 슬라이더 버튼 안에 값 표시 */}
+        <motion.img
+          src={icon}
+          alt="감정 아이콘"
+          className="w-full h-full drop-shadow-lg"
+          initial={false}
+          animate={{ scale: 1 }}
+          whileTap={{ scale: 1.2 }}
+        />
       </motion.div>
     </div>
   );

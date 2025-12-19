@@ -1,17 +1,25 @@
-import React, { useEffect, useState } from "react";
-import aiIcon from "../../Icon/ai.png";
-import { analyzeEmotion } from "../../api/analyzeApi"; // 분석 API import
-import "./MgModal.css";
-import { useAuthStore } from "../../hooks/stores/use-auth-store"; // Store 사용
-import { useDiaryCount } from "../../hooks/queries/use-diary-queries"; // React Query 사용
-import { Navigate, useNavigate } from "react-router-dom";
-import Logo from "../../logo/main_logo.png";
-import { DotLoader } from "react-spinners";
+import React, { useState } from "react"
+import { useNavigate } from "react-router-dom"
+import { motion, AnimatePresence } from "framer-motion"
+import { analyzeEmotion } from "../../api/analyzeApi"
+import { useAuthStore } from "../../hooks/stores/use-auth-store"
+import { useDiaryCount } from "../../hooks/queries/use-diary-queries"
+import { Button } from "@/components/ui/button"
+import { cn } from "@/lib/utils"
+import {
+  X,
+  Sparkles,
+  CheckCircle2,
+  ExternalLink,
+  Loader2,
+  Bot,
+} from "lucide-react"
+import Logo from "../../logo/main_logo.png"
 
 interface ModalProps {
-  content: string; // content prop 추가
-  onClose: () => void;
-  onAnalyzeComplete: (result: string) => void; // 분석 결과를 부모에게 전달하는 콜백
+  content: string
+  onClose: () => void
+  onAnalyzeComplete: (result: string) => void
 }
 
 const MgModal: React.FC<ModalProps> = ({
@@ -19,114 +27,181 @@ const MgModal: React.FC<ModalProps> = ({
   onClose,
   onAnalyzeComplete,
 }) => {
-  const [emotionResult, setEmotionResult] = useState<string | null>(null); // 분석 결과 상태
-  const [loading, setLoading] = useState(false); // 로딩 상태 추가
-  const [isChecked, setIsChecked] = useState(false); // 체크박스 상태 추가
-  const user = useAuthStore((state) => state.user); // Store에서 사용자 정보 가져오기
-  const { data: diaryCountData } = useDiaryCount(user?.user_id); // React Query로 일기 갯수 가져오기
-  const navigate = useNavigate(); // useNavigate 훅 사용
+  const [loading, setLoading] = useState(false)
+  const [isChecked, setIsChecked] = useState(false)
+  const user = useAuthStore((state) => state.user)
+  const { data: diaryCountData } = useDiaryCount(user?.user_id)
+  const navigate = useNavigate()
+
+  const diaryCount = diaryCountData ?? 0
+  const diaryText =
+    diaryCount === 0 ? "첫 번째" : diaryCount ? `${diaryCount}번째` : "N번째"
 
   const handleDashboard = () => {
-    // 다른 로직을 처리한 후 페이지 이동
-    navigate("/dashboard"); // "/target-page" 경로로 이동
-  };
-
-  // diaryCountData는 이미 number 타입이므로 직접 사용
-  const diaryCount = diaryCountData ?? 0;
+    navigate("/dashboard")
+  }
 
   const handleAnalyze = async () => {
-    if (!isChecked) return; // 체크박스가 체크되지 않으면 실행하지 않음
-    setLoading(true); // 분석 시작 시 로딩 상태를 true로 설정
+    if (!isChecked) return
+    setLoading(true)
     try {
-      // AI 분석 호출
-      const emotion = await analyzeEmotion(content);
-      setEmotionResult(emotion); // 분석 결과 상태 저장
-      onAnalyzeComplete(emotion); // 분석 결과를 부모 컴포넌트로 전달
+      const emotion = await analyzeEmotion(content)
+      onAnalyzeComplete(emotion)
     } catch (error) {
-      console.error("감정 분석 중 오류 발생:", error);
+      console.error("감정 분석 중 오류 발생:", error)
     } finally {
-      setLoading(false); // 분석이 완료되면 로딩 상태를 false로 설정
-      onClose(); // 로딩이 끝난 후 모달 닫기
+      setLoading(false)
+      onClose()
     }
-  };
-
-  const handleCheckboxChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setIsChecked(e.target.checked); // 체크박스 상태 업데이트
-  };
-
-  // diaryCount 처리 로직
-  const diaryText =
-    diaryCount === 0 ? "첫 번째" : diaryCount ? `${diaryCount}번째` : "N번째"; // 일기 갯수에 따라 표시할 텍스트
+  }
 
   return (
-    <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
-      <div className="Container w-[1000px] h-[500px] relative bg-white rounded-lg shadow-lg p-8 flex flex-col items-center">
-        {/* 사용자 안내 문구 */}
-        <div className="Paragraph text-center text-scampi-700 text-3xl font-bold font-['DM Sans'] leading-8 mt-20">
-          {user?.profile_name}님의 {diaryText} 무드일기 작성이 완료되었어요!{" "}
-        </div>
-        <div className="Paragraph text-center text-blue-950 text-xl font-bold font-['DM Sans'] leading-8 mt-5 mb-6">
-          꾸준히 무드 일기를 작성하면, 나의 마음 지도를 <br />
-          만들고 자기 돌봄 습관을 만들어 갈 수 있어요.
-        </div>
-
-        {/* AI 하루진단 안내 및 설명 */}
-        <div className="flex items-center justify-between w-full">
-          {/* 아이콘 이미지 */}
-          <div className="flex items-center justify-center w-1/6">
-            <img
-              src={Logo}
-              alt="Logo"
-              className="w-20 h-20 bg-scampi-500 rounded-full object-cover mb-10"
-            />
-          </div>
-
-          {/* AI 하루진단 안내 및 설명 */}
-          <div className="Paragraph text-left text-slate-400 text-lg font-bold font-plus-jakarta-sans w-4/6 mt-10">
-            무디타봇에게 [AI 하루진단]을 받아보세요. <br /> {user?.profile_name}
-            님이 작성한 일기 내용을 바탕으로 오늘 느낀 감정을 분석하고 <br />{" "}
-            그에 맞는 기분 가이드를 드려요.
-            <div className="text-zinc-500 text-sm font-plus-jakarta-sans leading-5 mt-10">
-              <input
-                type="checkbox"
-                className="mr-2"
-                checked={isChecked} // 체크박스 상태 연결
-                onChange={handleCheckboxChange} // 체크박스 상태 변경 처리
-              />
-              AI 분석을 위해 OpenAI에 작성글을 전송하는 것에 동의합니다. <br />
-            </div>
-            <a href="#" className="underline text-xs ml-4">
-              [이용 약관 자세히 보기]
-            </a>
-          </div>
-
-          {/* AI 하루진단 버튼 */}
-          <div className="flex flex-col items-center justify-center w-1/6 space-y-4 mb-12">
-            <button
-              onClick={handleAnalyze} // 버튼 클릭 시 감정 분석 실행
-              className={`bg-violet-400 dark:bg-scampi-600 text-white py-3 px-6 rounded-xl shadow-md hover:bg-scampi-400 dark:hover:bg-scampi-700 transition-colors ${
-                isChecked ? "" : "opacity-50 cursor-not-allowed"
-              }`}
-              disabled={!isChecked} // 체크박스가 체크되지 않았으면 버튼 비활성화
-            >
-              AI 하루진단
-            </button>
-          </div>
-        </div>
-
-        {/* 로딩 상태일 때 로딩 애니메이션 표시 */}
-        {loading && <DotLoader color="#7551FF" size={70} speedMultiplier={1} />}
-
-        {/* 닫기 버튼 */}
-        <button
+    <AnimatePresence>
+      <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+        {/* Backdrop */}
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          className="absolute inset-0 bg-black/60 backdrop-blur-sm"
           onClick={handleDashboard}
-          className="absolute right-4 top-4 bg-scampi-500 text-white py-2 px-4 rounded-xl shadow hover:bg-scampi-400 transition"
-        >
-          닫기
-        </button>
-      </div>
-    </div>
-  );
-};
+        />
 
-export default MgModal;
+        {/* Modal */}
+        <motion.div
+          initial={{ opacity: 0, scale: 0.95, y: 20 }}
+          animate={{ opacity: 1, scale: 1, y: 0 }}
+          exit={{ opacity: 0, scale: 0.95, y: 20 }}
+          transition={{ duration: 0.3 }}
+          className={cn(
+            "relative z-10 w-full max-w-3xl",
+            "bg-card rounded-2xl shadow-2xl",
+            "overflow-hidden"
+          )}
+          onClick={(e) => e.stopPropagation()}
+        >
+          {/* 상단 장식 */}
+          <div className="h-2 bg-gradient-to-r from-primary via-violet-500 to-primary" />
+
+          {/* 닫기 버튼 */}
+          <button
+            onClick={handleDashboard}
+            className={cn(
+              "absolute top-4 right-4 p-2 rounded-full",
+              "text-muted-foreground hover:text-foreground",
+              "hover:bg-muted transition-colors"
+            )}
+          >
+            <X size={20} />
+          </button>
+
+          {/* 내용 */}
+          <div className="p-6 sm:p-8 lg:p-10">
+            {/* 성공 메시지 */}
+            <div className="text-center mb-6 lg:mb-8">
+              <motion.div
+                initial={{ scale: 0 }}
+                animate={{ scale: 1 }}
+                transition={{ delay: 0.2, type: "spring" }}
+                className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-green-100 dark:bg-green-900/30 mb-4"
+              >
+                <CheckCircle2 className="w-8 h-8 text-green-600 dark:text-green-400" />
+              </motion.div>
+              <h2 className="text-xl sm:text-2xl lg:text-3xl font-bold text-primary mb-2">
+                {user?.profile_name}님의 {diaryText} 무드일기 작성 완료!
+              </h2>
+              <p className="text-sm sm:text-base text-muted-foreground max-w-md mx-auto">
+                꾸준히 무드 일기를 작성하면, 나의 마음 지도를 만들고 자기 돌봄
+                습관을 만들어 갈 수 있어요.
+              </p>
+            </div>
+
+            {/* AI 분석 섹션 */}
+            <div
+              className={cn(
+                "p-4 sm:p-6 rounded-xl",
+                "bg-gradient-to-br from-violet-50 to-purple-50",
+                "dark:from-violet-950/30 dark:to-purple-950/30",
+                "border border-violet-100 dark:border-violet-900/30"
+              )}
+            >
+              <div className="flex flex-col sm:flex-row gap-4 sm:gap-6">
+                {/* 아이콘 */}
+                <div className="flex-shrink-0 flex justify-center sm:justify-start">
+                  <div className="relative">
+                    <img
+                      src={Logo}
+                      alt="Logo"
+                      className="w-16 h-16 sm:w-20 sm:h-20 rounded-full object-cover ring-4 ring-primary/20"
+                    />
+                    <div className="absolute -bottom-1 -right-1 w-6 h-6 bg-primary rounded-full flex items-center justify-center">
+                      <Bot className="w-3.5 h-3.5 text-white" />
+                    </div>
+                  </div>
+                </div>
+
+                {/* 설명 */}
+                <div className="flex-1 text-center sm:text-left">
+                  <h3 className="text-base sm:text-lg font-semibold text-foreground mb-2 flex items-center justify-center sm:justify-start gap-2">
+                    <Sparkles className="w-4 h-4 text-primary" />
+                    AI 하루진단 받아보기
+                  </h3>
+                  <p className="text-sm text-muted-foreground mb-4">
+                    무디타봇이 {user?.profile_name}님의 일기를 분석하여 오늘 느낀
+                    감정을 파악하고, 맞춤형 기분 가이드를 제공해드려요.
+                  </p>
+
+                  {/* 동의 체크박스 */}
+                  <label className="flex items-start gap-2 cursor-pointer group mb-3">
+                    <input
+                      type="checkbox"
+                      checked={isChecked}
+                      onChange={(e) => setIsChecked(e.target.checked)}
+                      className="mt-0.5 w-4 h-4 rounded border-gray-300 text-primary focus:ring-primary"
+                    />
+                    <span className="text-xs sm:text-sm text-muted-foreground group-hover:text-foreground transition-colors">
+                      AI 분석을 위해 OpenAI에 작성글을 전송하는 것에 동의합니다.
+                    </span>
+                  </label>
+
+                  <a
+                    href="#"
+                    className="inline-flex items-center gap-1 text-xs text-primary hover:underline"
+                  >
+                    이용 약관 자세히 보기
+                    <ExternalLink className="w-3 h-3" />
+                  </a>
+                </div>
+
+                {/* 버튼 */}
+                <div className="flex-shrink-0 flex items-center justify-center">
+                  <Button
+                    onClick={handleAnalyze}
+                    disabled={!isChecked || loading}
+                    variant="violet"
+                    size="lg"
+                    className="gap-2"
+                  >
+                    {loading ? (
+                      <>
+                        <Loader2 className="w-4 h-4 animate-spin" />
+                        분석 중...
+                      </>
+                    ) : (
+                      <>
+                        <Sparkles className="w-4 h-4" />
+                        AI 하루진단
+                      </>
+                    )}
+                  </Button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </motion.div>
+      </div>
+    </AnimatePresence>
+  )
+}
+
+export default MgModal

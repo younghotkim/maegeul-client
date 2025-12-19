@@ -56,8 +56,15 @@ apiClient.interceptors.response.use(
   (error: AxiosError) => {
     // 중앙 집중식 에러 처리
     if (error.response?.status === 401) {
-      localStorage.removeItem("token");
-      window.location.href = "/mainlogin";
+      // 로그인 관련 페이지에서는 리다이렉트하지 않음
+      const currentPath = window.location.pathname;
+      const authPaths = ['/mainlogin', '/email-login', '/mainsignup', '/kakao/callback', '/login/success'];
+      
+      if (!authPaths.some(path => currentPath.includes(path))) {
+        // auth-storage에서 상태 초기화
+        localStorage.removeItem("auth-storage");
+        window.location.href = "/mainlogin";
+      }
     }
     return Promise.reject(error);
   }

@@ -1,14 +1,14 @@
 import React, { useState } from "react";
+import { motion } from "framer-motion";
+import { Info } from "lucide-react";
 import Emoji_1 from "../Icon/emoji01.gif";
 import Emoji_3 from "../Icon/emoji03.gif";
 import Emoji_5 from "../Icon/emoji05.gif";
 import Emoji_7 from "../Icon/emoji07.gif";
 import Emoji_9 from "../Icon/emoji09.gif";
-import Info from "../Icon/Info.png";
 import Tooltip from "./Tooltip";
 import ProgressBar from "./ProgressBar";
 import CustomSlider from "./CustomSlider";
-import { motion } from "framer-motion";
 
 interface MoodSliderProps {
   onValueChange: (value: number) => void;
@@ -24,13 +24,13 @@ const emojis = [
 ];
 
 const MoodSlider: React.FC<MoodSliderProps> = ({ onValueChange, onSubmit }) => {
-  const [value, setValue] = useState<number>(5); // 초기값 5로 설정
-  const [progress, setProgress] = useState<number>(0); // ProgressBar의 상태값
+  const [value, setValue] = useState<number>(5);
+  const [progress, setProgress] = useState<number>(0);
 
   const handleSliderChange = (newValue: number) => {
     setValue(newValue);
     onValueChange(newValue);
-    setProgress(20); // 슬라이더가 변경되면 ProgressBar를 20%로 설정
+    setProgress(20);
   };
 
   const currentEmoji = emojis.find(
@@ -39,53 +39,119 @@ const MoodSlider: React.FC<MoodSliderProps> = ({ onValueChange, onSubmit }) => {
 
   return (
     <>
-      <div className="w-[1140px] relative mt-10 mx-auto">
-        {/* 텍스트 (ProgressBar 왼쪽 끝에 위치) */}
-        <div className="absolute top-[-2rem] left-0 z-10 font-bold text-scampi-700 dark:text-scampi-300 font-['DM Sans'] leading-10">
+      {/* Progress Bar 섹션 */}
+      <div className="w-full max-w-[1140px] relative mt-10 mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="absolute top-[-2rem] left-4 sm:left-6 lg:left-0 z-10 font-bold text-scampi-700 dark:text-scampi-300 text-sm sm:text-base">
           1단계: 감정 인식하기
         </div>
-        {/* Progress Bar (가운데에 위치) */}
         <div className="w-full flex justify-center">
-          <ProgressBar value={progress} />{" "}
-          {/* ProgressBar의 value를 상태값으로 설정 */}
+          <ProgressBar value={progress} />
         </div>
       </div>
-      <div className="w-full max-w-4xl mx-auto mt-10">
-        <div className="text-center mb-8">
-          <h1
-            className="text-blue-950 text-5xl font-black font-['font-plus-jakarta-sans'] leading-5
-            mb-9 dark:text-scampi-300 inline-flex items-center"
+
+      {/* 메인 컨텐츠 */}
+      <motion.div
+        className="w-full max-w-4xl mx-auto mt-8 sm:mt-10 px-4 sm:px-6"
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.6 }}
+      >
+        {/* 헤더 섹션 */}
+        <div className="text-center mb-8 sm:mb-12">
+          <motion.h1
+            className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-black text-blue-950 dark:text-white mb-4 sm:mb-6 inline-flex items-center justify-center flex-wrap gap-2"
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.2, duration: 0.5 }}
           >
-            오늘 나의 편안 지수는?
+            <span className="bg-gradient-to-r from-violet-600 to-indigo-600 bg-clip-text text-transparent">
+              오늘 나의 편안 지수는?
+            </span>
             <Tooltip
               message="오늘 나의 편안함 수치는 몇인가요? 
-            만족감, 쾌적함, 기쁨 등 내가 느낀 긍정 감정의 정도를 기록해 봅시다."
+              만족감, 쾌적함, 기쁨 등 내가 느낀 긍정 감정의 정도를 기록해 봅시다."
             >
-              <img src={Info} alt="Info" className="ml-2 cursor-pointer" />
+              <div className="w-6 h-6 sm:w-7 sm:h-7 rounded-full bg-violet-100 dark:bg-violet-900/30 flex items-center justify-center cursor-help hover:bg-violet-200 dark:hover:bg-violet-900/50 transition-colors">
+                <Info className="w-4 h-4 sm:w-5 sm:h-5 text-violet-600 dark:text-violet-400" />
+              </div>
             </Tooltip>
-          </h1>
-          <div className="text-center text-slate-500 text-base font-bold font-plus-jakarta-sans leading-normal">
-            지금 내가 느끼는 편안함, 얼마나 만족스럽고 쾌적한 상태인지 긍정
-            감정의 정도를 측정해 봅시다.
-          </div>
+          </motion.h1>
+
+          <motion.p
+            className="text-sm sm:text-base text-slate-500 dark:text-slate-400 font-medium max-w-lg mx-auto leading-relaxed"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 0.4, duration: 0.5 }}
+          >
+            지금 내가 느끼는 편안함, 얼마나 만족스럽고 쾌적한 상태인지
+            <br className="hidden sm:block" />
+            긍정 감정의 정도를 측정해 봅시다.
+          </motion.p>
         </div>
-        {/* 슬라이더 100px의 여백을 추가(mt-20) */}
+
+        {/* 슬라이더 카드 */}
         <motion.div
-          initial={{ opacity: 0, y: 50 }} // 시작할 때 완전히 투명하고 아래에 위치
-          animate={{ opacity: 1, y: 0 }} // 등장하면서 서서히 보이고 제자리로 이동
-          transition={{ duration: 0.8, ease: "easeOut" }} // 부드러운 애니메이션과 0.8초의 지속 시간
-          className="mt-20"
+          className="bg-white dark:bg-gray-800 rounded-3xl shadow-xl p-6 sm:p-8 md:p-10 border border-gray-100 dark:border-gray-700"
+          initial={{ opacity: 0, y: 30, scale: 0.95 }}
+          animate={{ opacity: 1, y: 0, scale: 1 }}
+          transition={{ delay: 0.3, duration: 0.6, ease: "easeOut" }}
         >
-          <CustomSlider
-            value={value}
-            onChange={handleSliderChange}
-            min={1}
-            max={10}
-            icon={currentEmoji ? currentEmoji.gif : ""}
-            iconSize={48}
-          />
+          {/* 현재 감정 상태 표시 */}
+          <div className="text-center mb-8">
+            <motion.div
+              className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-violet-50 dark:bg-violet-900/20 border border-violet-200 dark:border-violet-800"
+              key={value}
+              initial={{ scale: 0.9, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              transition={{ duration: 0.3 }}
+            >
+              <span className="text-sm font-medium text-violet-700 dark:text-violet-300">
+                현재 편안 지수
+              </span>
+              <span className="text-lg font-bold text-violet-600 dark:text-violet-400">
+                {value}
+              </span>
+              <span className="text-sm text-violet-500 dark:text-violet-400">
+                / 10
+              </span>
+            </motion.div>
+          </div>
+
+          {/* 슬라이더 */}
+          <div className="py-4">
+            <CustomSlider
+              value={value}
+              onChange={handleSliderChange}
+              min={1}
+              max={10}
+              icon={currentEmoji ? currentEmoji.gif : ""}
+              iconSize={52}
+            />
+          </div>
+
+          {/* 범례 */}
+          <div className="flex justify-between items-center mt-8 px-2 sm:px-4">
+            <div className="flex items-center gap-2">
+              <div className="w-3 h-3 rounded-full bg-blue-400" />
+              <span className="text-xs sm:text-sm text-gray-500 dark:text-gray-400">
+                불편함
+              </span>
+            </div>
+            <div className="flex items-center gap-2">
+              <div className="w-3 h-3 rounded-full bg-violet-500" />
+              <span className="text-xs sm:text-sm text-gray-500 dark:text-gray-400">
+                보통
+              </span>
+            </div>
+            <div className="flex items-center gap-2">
+              <div className="w-3 h-3 rounded-full bg-rose-400" />
+              <span className="text-xs sm:text-sm text-gray-500 dark:text-gray-400">
+                편안함
+              </span>
+            </div>
+          </div>
         </motion.div>
-      </div>
+      </motion.div>
     </>
   );
 };
