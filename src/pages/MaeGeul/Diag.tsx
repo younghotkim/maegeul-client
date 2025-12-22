@@ -19,17 +19,7 @@ import QuickMoodSelect from "../../components/QuickMoodSelect";
 import ProgressBar from "../../components/ProgressBar";
 import { useAuthStore } from "../../hooks/stores/use-auth-store";
 import { useMoodStore } from "../../hooks/stores/use-mood-store";
-
-// API URL 가져오기
-const getAPIURL = () => {
-  const envUrl = import.meta.env.VITE_API_URL;
-  if (envUrl && !envUrl.includes("YOUR_SERVER_IP") && envUrl.startsWith("http")) {
-    return envUrl.replace(/\/api$/, "");
-  }
-  throw new Error("VITE_API_URL 환경 변수가 필요합니다.");
-};
-
-const API_URL = getAPIURL();
+import { apiClient } from "../../lib/api-client";
 
 type DiagMode = "select" | "quick" | "detailed" | "result" | "quick-complete";
 
@@ -278,38 +268,28 @@ const Diag: React.FC = () => {
     try {
       const colorName = highlightedColor ? getColorName(highlightedColor) : "";
       const labelText = highlightedLabels.join(", ");
-      
-      // 1. 무드 데이터 저장
-      const moodResponse = await fetch(`${API_URL}/api/save-moodmeter`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          user_id: user.user_id,
-          pleasantness: moodValue,
-          energy: energyValue,
-          label: labelText,
-          color: colorName,
-        }),
+
+      // 1. 무드 데이터 저장 (apiClient 사용 - 자동으로 토큰 추가)
+      await apiClient.post('/save-moodmeter', {
+        user_id: user.user_id,
+        pleasantness: moodValue,
+        energy: energyValue,
+        label: labelText,
+        color: colorName,
       });
 
-      if (!moodResponse.ok) throw new Error("무드 저장 실패");
-      
       // 2. 일기 테이블에도 저장 (빠른 체크인 기록용 - 내용 없이 기분만)
-      const diaryResponse = await fetch(`${API_URL}/api/diary`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
+      try {
+        await apiClient.post('/diary', {
           user_id: user.user_id,
           title: `빠른 체크인: ${labelText || colorName}`,
           content: `#${labelText.split(", ").join(" #")}`, // 태그만 저장
           color: colorName,
-        }),
-      });
-
-      if (!diaryResponse.ok) {
-        console.warn("일기 저장 실패 (무드는 저장됨)");
+        });
+      } catch (diaryError) {
+        console.warn("일기 저장 실패 (무드는 저장됨)", diaryError);
       }
-      
+
       setIsSaved(true);
       // 1.5초 후 대시보드로 이동
       setTimeout(() => navigate("/dashboard"), 1500);

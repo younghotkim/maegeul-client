@@ -1,7 +1,8 @@
 import { useEffect, useState } from "react";
 import Box from "@mui/material/Box";
-import { useAuthStore } from "../../hooks/stores/use-auth-store"; // Store 사용
-import { AnalyticsOrderTimeline } from "../../sections/overview/analytics-order-timeline"; // 타임라인 컴포넌트 임포트
+import { useAuthStore } from "../../hooks/stores/use-auth-store";
+import { AnalyticsOrderTimeline } from "../../sections/overview/analytics-order-timeline";
+import { apiClient } from "../../lib/api-client";
 
 // Diary 타입 정의
 interface Diary {
@@ -13,30 +14,6 @@ interface Diary {
   color: string;
 }
 
-// 환경 변수에서 API URL을 가져옴
-const getAPIURL = () => {
-  const envUrl = import.meta.env.VITE_API_URL;
-
-  // 환경 변수가 있고, placeholder가 아니고, 유효한 URL인 경우에만 사용
-  if (
-    envUrl &&
-    !envUrl.includes("YOUR_SERVER_IP") &&
-    envUrl.startsWith("http")
-  ) {
-    return envUrl.replace(/\/api$/, ""); // /api 제거 (이미 포함되어 있을 수 있음)
-  }
-
-  // 환경 변수가 없으면 에러
-  console.error("❌ VITE_API_URL 환경 변수가 설정되지 않았습니다.");
-  console.error("개발 환경에서는 .env 파일에 VITE_API_URL을 설정하세요.");
-  console.error("프로덕션 환경에서는 Vercel 환경 변수를 확인하세요.");
-  throw new Error(
-    "VITE_API_URL 환경 변수가 필요합니다. .env 파일 또는 Vercel 환경 변수를 확인하세요."
-  );
-};
-
-const API_URL = getAPIURL();
-
 export function DiaryTimeline() {
   const [diaryData, setDiaryData] = useState<Diary[]>([]); // Diary 데이터를 저장하는 상태
   const user = useAuthStore((state) => state.user); // Store에서 사용자 정보 가져오기
@@ -44,8 +21,8 @@ export function DiaryTimeline() {
   // Diary 데이터를 API에서 가져오는 함수
   const fetchDiaryData = async () => {
     try {
-      const response = await fetch(`${API_URL}/api/diary/${user?.user_id}`);
-      const data = await response.json();
+      const response = await apiClient.get(`/diary/${user?.user_id}`);
+      const data = response.data;
 
       // 응답이 배열인지 확인 후 처리
       if (Array.isArray(data)) {

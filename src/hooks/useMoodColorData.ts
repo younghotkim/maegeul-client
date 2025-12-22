@@ -1,29 +1,6 @@
 import { useState, useEffect } from "react";
-import { useAuthStore } from "./stores/use-auth-store"; // Store 사용
-
-// 환경 변수에서 API URL을 가져옴
-const getAPIURL = () => {
-  const envUrl = import.meta.env.VITE_API_URL;
-
-  // 환경 변수가 있고, placeholder가 아니고, 유효한 URL인 경우에만 사용
-  if (
-    envUrl &&
-    !envUrl.includes("YOUR_SERVER_IP") &&
-    envUrl.startsWith("http")
-  ) {
-    return envUrl;
-  }
-
-  // 환경 변수가 없으면 에러
-  console.error("❌ VITE_API_URL 환경 변수가 설정되지 않았습니다.");
-  console.error("개발 환경에서는 .env 파일에 VITE_API_URL을 설정하세요.");
-  console.error("프로덕션 환경에서는 Vercel 환경 변수를 확인하세요.");
-  throw new Error(
-    "VITE_API_URL 환경 변수가 필요합니다. .env 파일 또는 Vercel 환경 변수를 확인하세요."
-  );
-};
-
-const API_URL = getAPIURL();
+import { useAuthStore } from "./stores/use-auth-store";
+import { apiClient } from "../lib/api-client";
 
 // 커스텀 훅: user_id에 따른 무드 컬러 데이터를 가져옴
 export const useMoodColorData = () => {
@@ -39,10 +16,10 @@ export const useMoodColorData = () => {
   useEffect(() => {
     const fetchMoodColorData = async () => {
       try {
-        const response = await fetch(
-          `${API_URL}/moodmeter/colorcount/${user?.user_id}`
+        const response = await apiClient.get(
+          `/moodmeter/colorcount/${user?.user_id}`
         );
-        const data = await response.json();
+        const data = response.data;
 
         // 초기 상태를 직접 정의하여 사용 (moodColorData 의존성 제거)
         const initialMoodColorData = [

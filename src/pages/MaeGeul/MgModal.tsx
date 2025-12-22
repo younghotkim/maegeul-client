@@ -5,6 +5,7 @@ import { analyzeEmotion } from "../../api/analyzeApi";
 import { useAuthStore } from "../../hooks/stores/use-auth-store";
 import { useMoodStore } from "../../hooks/stores/use-mood-store";
 import { useDiaryCount } from "../../hooks/queries/use-diary-queries";
+import { apiClient } from "../../lib/api-client";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import {
@@ -17,17 +18,6 @@ import {
   Save,
 } from "lucide-react";
 import Logo from "../../logo/main_logo.png";
-
-// API URL 가져오기
-const getAPIURL = () => {
-  const envUrl = import.meta.env.VITE_API_URL;
-  if (envUrl && !envUrl.includes("YOUR_SERVER_IP") && envUrl.startsWith("http")) {
-    return envUrl.replace(/\/api$/, "");
-  }
-  throw new Error("VITE_API_URL 환경 변수가 필요합니다.");
-};
-
-const API_URL = getAPIURL();
 
 // 간단한 마크다운 렌더러
 const renderMarkdown = (text: string): React.ReactNode[] => {
@@ -186,14 +176,10 @@ const MgModal: React.FC<ModalProps> = ({
     
     setSavingAnalysis(true);
     try {
-      await fetch(`${API_URL}/api/emotion`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          user_id: user.user_id,
-          diary_id: diaryId,
-          emotion_result: analysisResult,
-        }),
+      await apiClient.post('/emotion', {
+        user_id: user.user_id,
+        diary_id: diaryId,
+        emotion_result: analysisResult,
       });
 
       setAnalysisSaved(true);

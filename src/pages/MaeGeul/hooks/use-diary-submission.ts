@@ -1,28 +1,5 @@
 import { useState, useEffect } from "react";
-
-// 환경 변수에서 API URL을 가져옴
-const getAPIURL = () => {
-  const envUrl = import.meta.env.VITE_API_URL;
-
-  // 환경 변수가 있고, placeholder가 아니고, 유효한 URL인 경우에만 사용
-  if (
-    envUrl &&
-    !envUrl.includes("YOUR_SERVER_IP") &&
-    envUrl.startsWith("http")
-  ) {
-    return envUrl.replace(/\/api$/, ""); // /api 제거 (이미 포함되어 있을 수 있음)
-  }
-
-  // 환경 변수가 없으면 에러
-  console.error("❌ VITE_API_URL 환경 변수가 설정되지 않았습니다.");
-  console.error("개발 환경에서는 .env 파일에 VITE_API_URL을 설정하세요.");
-  console.error("프로덕션 환경에서는 Vercel 환경 변수를 확인하세요.");
-  throw new Error(
-    "VITE_API_URL 환경 변수가 필요합니다. .env 파일 또는 Vercel 환경 변수를 확인하세요."
-  );
-};
-
-const API_URL = getAPIURL();
+import { apiClient } from "../../../lib/api-client";
 
 interface SaveMoodData {
   user_id?: number;
@@ -73,49 +50,27 @@ export function useDiarySubmission() {
 
   const handleSaveMoodData = async (moodData: SaveMoodData) => {
     try {
-      const response = await fetch(`${API_URL}/api/save-moodmeter`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(moodData),
-      });
-
-      if (!response.ok) {
-        throw new Error("데이터 저장 중 오류가 발생했습니다.");
-      }
-
-      const result = await response.json();
+      const response = await apiClient.post('/save-moodmeter', moodData);
       console.log(
-        `데이터가 성공적으로 저장되었습니다. 저장된 ID: ${result.id}`
+        `데이터가 성공적으로 저장되었습니다. 저장된 ID: ${response.data.id}`
       );
     } catch (error) {
       console.error("저장 중 오류가 발생했습니다.", error);
+      throw error;
     }
   };
 
   const handleSaveDiary = async (diaryData: SaveDiaryData) => {
     try {
-      const response = await fetch(`${API_URL}/api/diary`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(diaryData),
-      });
-
-      if (!response.ok) {
-        throw new Error("일기 저장 중 오류가 발생했습니다.");
-      }
-
-      const result = await response.json();
-      setDiaryId(result.diary_id);
+      const response = await apiClient.post('/diary', diaryData);
+      setDiaryId(response.data.diary_id);
       setDiarySaved(true);
       console.log(
-        `일기가 성공적으로 저장되었습니다. 일기 ID: ${result.diary_id}`
+        `일기가 성공적으로 저장되었습니다. 일기 ID: ${response.data.diary_id}`
       );
     } catch (error) {
       console.error("일기 저장 중 오류 발생:", error);
+      throw error;
     }
   };
 
@@ -125,25 +80,15 @@ export function useDiarySubmission() {
 
       const emotionResultString = sentences.join(" ");
 
-      const response = await fetch(`${API_URL}/api/emotion`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          ...emotionData,
-          emotion_result: emotionResultString,
-        }),
+      const response = await apiClient.post('/emotion', {
+        ...emotionData,
+        emotion_result: emotionResultString,
       });
 
-      if (!response.ok) {
-        throw new Error("감정 분석 결과 저장 중 오류가 발생했습니다.");
-      }
-
-      const result = await response.json();
-      console.log("감정 분석 결과가 성공적으로 저장되었습니다:", result);
+      console.log("감정 분석 결과가 성공적으로 저장되었습니다:", response.data);
     } catch (error) {
       console.error("감정 분석 결과 저장 중 오류 발생:", error);
+      throw error;
     }
   };
 
