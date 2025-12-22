@@ -21,3 +21,4 @@ export default defineConfig({
   // 환경 변수 접두사 설정
   envPrefix: "VITE_",
 });
+
