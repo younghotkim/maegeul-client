@@ -137,7 +137,8 @@ export function MoodCalendar() {
   return (
     <Card
       sx={{
-        height: { xs: "auto", md: "400px" },
+        height: "100%",
+        minHeight: 400,
         display: "flex",
         flexDirection: "column",
         borderRadius: 3,

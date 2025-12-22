@@ -76,12 +76,13 @@ export function DiaryTimeline() {
     <Box
       sx={{
         width: "100%",
-        px: { xs: 1, sm: 2 },
+        height: "100%",
       }}
     >
       <AnalyticsOrderTimeline
         title="무드 컬러 타임라인"
-        list={_timeline} // 변환한 _timeline 데이터 전달
+        list={_timeline}
+        sx={{ height: "100%", minHeight: 400 }}
       />
     </Box>
   );

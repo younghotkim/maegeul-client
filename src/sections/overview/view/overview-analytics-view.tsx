@@ -18,6 +18,10 @@ import { useDiaryCount } from "../../../hooks/queries/use-diary-queries";
 import { countEmotionAnalysisByUserId } from ".././../../api/emotionApi";
 import { DiaryTimeline } from "../../../dashboardComponents/timeline/DiaryTimeline";
 import { MoodCalendar } from "../../../dashboardComponents/calendar/MoodCalendar";
+import { EmotionTrendChart } from "../../../dashboardComponents/emotion-trend/EmotionTrendChart";
+import { DiaryStreak } from "../../../dashboardComponents/streak/DiaryStreak";
+import { EmotionInsights } from "../../../dashboardComponents/insights/EmotionInsights";
+import { MoodRecommendations } from "../../../dashboardComponents/recommendations/MoodRecommendations";
 
 // Lucide 아이콘
 import { Palette, Smile, BookOpen, Sparkles } from "lucide-react";
@@ -216,38 +220,79 @@ export function OverviewAnalyticsView() {
 
           {/* 차트 섹션 */}
           <Grid xs={12} md={6} lg={4}>
-            <motion.div variants={itemVariants}>
+            <motion.div variants={itemVariants} style={{ height: "100%" }}>
               <AnalyticsCurrentVisits
                 title="무드 컬러"
                 chart={{
                   series: moodColorData,
                   colors: ["#6AD2FF", "#FFDE57", "#35D28A", "#EE5D50"],
                 }}
+                sx={{ height: "100%", minHeight: 400 }}
               />
             </motion.div>
           </Grid>
 
           <Grid xs={12} md={6} lg={8}>
-            <motion.div variants={itemVariants}>
-              <AnalyticsWordCloud title="감정 어휘 클라우드" />
+            <motion.div variants={itemVariants} style={{ height: "100%" }}>
+              <Box sx={{ height: "100%", minHeight: 400 }}>
+                <AnalyticsWordCloud title="감정 어휘 클라우드" />
+              </Box>
             </motion.div>
           </Grid>
 
           <Grid xs={12} md={6} lg={4}>
-            <motion.div variants={itemVariants}>
-              <DiaryTimeline />
+            <motion.div variants={itemVariants} style={{ height: "100%" }}>
+              <Box sx={{ height: "100%", minHeight: 400 }}>
+                <DiaryTimeline />
+              </Box>
             </motion.div>
           </Grid>
 
           <Grid xs={12} md={6} lg={4}>
-            <motion.div variants={itemVariants}>
-              <MoodCalendar />
+            <motion.div variants={itemVariants} style={{ height: "100%" }}>
+              <Box sx={{ height: "100%", minHeight: 400 }}>
+                <MoodCalendar />
+              </Box>
             </motion.div>
           </Grid>
 
           <Grid xs={12} md={6} lg={4}>
-            <motion.div variants={itemVariants}>
-              <AnalyticsNews title="추천 컨텐츠" list={_posts.slice(0, 3)} />
+            <motion.div variants={itemVariants} style={{ height: "100%" }}>
+              <Box sx={{ height: "100%", minHeight: 400 }}>
+                <DiaryStreak />
+              </Box>
+            </motion.div>
+          </Grid>
+
+          {/* 감정 트렌드 & 인사이트 */}
+          <Grid xs={12} md={8}>
+            <motion.div variants={itemVariants} style={{ height: "100%" }}>
+              <Box sx={{ height: "100%", minHeight: 380 }}>
+                <EmotionTrendChart />
+              </Box>
+            </motion.div>
+          </Grid>
+
+          <Grid xs={12} md={4}>
+            <motion.div variants={itemVariants} style={{ height: "100%" }}>
+              <Box sx={{ height: "100%", minHeight: 380 }}>
+                <EmotionInsights />
+              </Box>
+            </motion.div>
+          </Grid>
+
+          {/* 맞춤 추천 */}
+          <Grid xs={12} md={6}>
+            <motion.div variants={itemVariants} style={{ height: "100%" }}>
+              <Box sx={{ height: "100%", minHeight: 320 }}>
+                <MoodRecommendations />
+              </Box>
+            </motion.div>
+          </Grid>
+
+          <Grid xs={12} md={6}>
+            <motion.div variants={itemVariants} style={{ height: "100%" }}>
+              <AnalyticsNews title="추천 컨텐츠" list={_posts.slice(0, 3)} sx={{ height: "100%", minHeight: 320 }} />
             </motion.div>
           </Grid>
 

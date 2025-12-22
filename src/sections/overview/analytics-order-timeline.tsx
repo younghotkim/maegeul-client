@@ -37,7 +37,8 @@ export function AnalyticsOrderTimeline({
     <Card
       {...other}
       sx={{
-        height: { xs: "350px", sm: "380px", md: "400px" },
+        height: "100%",
+        minHeight: 400,
         display: "flex",
         flexDirection: "column",
         width: "100%",
@@ -47,6 +48,7 @@ export function AnalyticsOrderTimeline({
         "&:hover": {
           boxShadow: `0 8px 24px ${alpha(theme.palette.grey[500], 0.16)}`,
         },
+        ...other.sx,
       }}
     >
       <CardHeader
