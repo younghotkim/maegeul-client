@@ -1,7 +1,9 @@
 import React, { useState } from "react";
 import { Link } from "react-router-dom";
+import { Button } from "@/components/ui/button";
+import { Check, ChevronDown, ChevronUp, FileText, Shield, Mail } from "lucide-react";
+import { cn } from "@/lib/utils";
 
-// 체크박스의 상태를 관리하는 타입 선언 (전체, 개인정보, 이용약관, 마케팅 동의)
 type CheckedItems = {
   all: boolean;
   personalInfo: boolean;
@@ -9,16 +11,34 @@ type CheckedItems = {
   marketingConsent: boolean;
 };
 
-// 각 동의 항목의 세부 내용 펼치기/접기 상태를 관리하는 타입 선언
 type OpenSections = {
   personalInfo: boolean;
   usageTerms: boolean;
   marketingConsent: boolean;
 };
 
-// 회원가입 첫 번째 스텝 컴포넌트
+const agreementItems = [
+  {
+    key: "personalInfo",
+    label: "개인 정보 수집 및 이용",
+    required: true,
+    icon: Shield,
+  },
+  {
+    key: "usageTerms",
+    label: "매글 서비스 이용약관",
+    required: true,
+    icon: FileText,
+  },
+  {
+    key: "marketingConsent",
+    label: "마케팅 정보 수신 동의",
+    required: false,
+    icon: Mail,
+  },
+];
+
 const SignupStep1: React.FC = () => {
-  // 체크박스 선택 상태를 관리하는 state
   const [checkedItems, setCheckedItems] = useState<CheckedItems>({
     all: false,
     personalInfo: false,
@@ -26,20 +46,16 @@ const SignupStep1: React.FC = () => {
     marketingConsent: false,
   });
 
-  // 약관 세부 내용을 펼치거나 접는 상태를 관리하는 state
   const [openSections, setOpenSections] = useState<OpenSections>({
     personalInfo: false,
     usageTerms: false,
     marketingConsent: false,
   });
 
-  // 특정 체크박스 선택 상태 변경 시 호출되는 함수
-  // 모든 항목이 선택되었을 경우 "전체 동의"도 체크됨
   const handleCheck = (item: keyof CheckedItems, checked: boolean) => {
     setCheckedItems((prevState) => {
       const updatedState = { ...prevState, [item]: checked };
 
-      // 전체 동의 선택 시, 모든 체크박스를 동일한 상태로 설정
       if (item === "all") {
         return {
           all: checked,
@@ -49,7 +65,6 @@ const SignupStep1: React.FC = () => {
         };
       }
 
-      // 개별 항목의 선택 여부에 따라 전체 동의 상태 업데이트
       const allChecked = updatedState.personalInfo && updatedState.usageTerms;
       return {
         ...updatedState,
@@ -58,7 +73,6 @@ const SignupStep1: React.FC = () => {
     });
   };
 
-  // 약관 세부 항목 펼치기/접기를 토글하는 함수
   const toggleSection = (section: keyof OpenSections) => {
     setOpenSections((prevState) => ({
       ...prevState,
@@ -66,109 +80,170 @@ const SignupStep1: React.FC = () => {
     }));
   };
 
-  // 필수 약관이 체크되지 않았을 경우 다음 버튼 비활성화
   const isNextButtonDisabled =
     !checkedItems.personalInfo || !checkedItems.usageTerms;
 
   return (
-    <div className="font-plus-jakarta-sans flex flex-col items-center justify-center min-h-screen bg-gray-100 p-5 dark:bg-gray-800 dark:text-white">
-      <div className="w-full max-w-lg p-6 bg-white rounded-lg shadow-md dark:bg-gray-900">
-        {/* STEP 1 제목 */}
-        <h2 className="text-scampi-700 dark:text-scampi-300 text-xl font-bold mb-4">
-          STEP 1
-        </h2>
-
-        {/* 상단 장식 라인 */}
-        <div className="w-full border-t-8 border-violet-500 pt-4 mt-8 text-center text-scampi-700 dark:text-scampi-300"></div>
-
-        {/* 이용약관 체크하기 제목 */}
-        <h3 className="text-scampi-700 dark:text-scampi-300 text-xl font-bold mb-4">
-          이용약관 체크하기
-        </h3>
-
-        {/* 전체 동의 항목 */}
-        <label
-          className={`p-4 rounded-full border  mb-2 flex items-center justify-between cursor-pointer ${
-            checkedItems.all ? "bg-violet-100 border-violet-500" : "bg-white"
-          }`}
-        >
-          <input
-            type="checkbox"
-            checked={checkedItems.all} // 전체 동의 체크 여부에 따라 체크박스 상태 업데이트
-            onChange={(e) => handleCheck("all", e.target.checked)} // 상태 변경 함수 호출
-            className="mr-2 w-6 h-6 cursor-pointer"
-          />
-          <span className="flex-grow text-gray-800 dark:text-white cursor-pointer">
-            이용약관 전체동의(선택 동의 포함)
-          </span>
-        </label>
-
-        {/* 개별 동의 항목 */}
-        {["personalInfo", "usageTerms", "marketingConsent"].map(
-          (item, index) => (
-            <div key={index}>
-              <label
-                className={`p-4 rounded-full border   mb-2 flex items-center justify-between cursor-pointer ${
-                  checkedItems[item as keyof CheckedItems]
-                    ? "bg-violet-100 border-violet-500"
-                    : "bg-white"
-                }`}
-              >
-                <div className="flex items-center">
-                  <input
-                    type="checkbox"
-                    checked={checkedItems[item as keyof CheckedItems]} // 각 항목의 체크박스 상태에 따라 렌더링
-                    onChange={(e) =>
-                      handleCheck(item as keyof CheckedItems, e.target.checked)
-                    } // 상태 변경 함수 호출
-                    className="mr-2 w-6 h-6 cursor-pointer"
-                  />
-                  <span className="text-gray-800 dark:text-white cursor-pointer">
-                    {/* 각 항목에 맞는 텍스트 표시 */}
-                    {item === "personalInfo" && "(필수) 개인 정보 수집 및 이용"}
-                    {item === "usageTerms" && "(필수) 매글 사용 약관"}
-                    {item === "marketingConsent" &&
-                      "(선택) 매글 마케팅 메시지 수신 동의"}
-                  </span>
-                </div>
-
-                {/* 세부 약관 펼치기/접기 버튼 */}
-                <button
-                  onClick={(e) => {
-                    e.stopPropagation(); // 부모 요소의 클릭 이벤트 중지
-                    toggleSection(item as keyof OpenSections); // 해당 항목의 세부 내용 펼치기/접기
-                  }}
-                  className="text-gray-500"
-                >
-                  {openSections[item as keyof OpenSections] ? "🔼" : "🔽"}
-                </button>
-              </label>
-
-              {/* 동의 항목 세부 사항 - 조건부 렌더링 */}
-              {openSections[item as keyof OpenSections] && (
-                <div className="ml-8 mb-4 text-gray-600 dark:text-gray-400">
-                  <Link to={"#"}>세부 약관 보기</Link> {/* 세부 약관 링크 */}
-                </div>
-              )}
+    <div className="min-h-screen bg-gradient-to-b from-violet-50 to-white dark:from-gray-900 dark:to-gray-800 flex items-center justify-center p-4">
+      <div className="w-full max-w-md">
+        {/* Progress Indicator */}
+        <div className="flex items-center justify-center gap-2 mb-8">
+          <div className="flex items-center gap-2">
+            <div className="w-8 h-8 rounded-full bg-violet-500 text-white flex items-center justify-center text-sm font-bold">
+              1
             </div>
-          )
-        )}
+            <span className="text-sm font-medium text-violet-600 dark:text-violet-400">
+              약관 동의
+            </span>
+          </div>
+          <div className="w-12 h-0.5 bg-gray-200 dark:bg-gray-700" />
+          <div className="flex items-center gap-2">
+            <div className="w-8 h-8 rounded-full bg-gray-200 dark:bg-gray-700 text-gray-400 flex items-center justify-center text-sm font-bold">
+              2
+            </div>
+            <span className="text-sm font-medium text-gray-400">정보 입력</span>
+          </div>
+        </div>
 
-        {/* 다음 버튼 */}
-        <div className="mt-8">
-          {/* 필수 항목이 체크되지 않으면 다음 페이지로 이동 불가 */}
-          <Link to={isNextButtonDisabled ? "#" : "/signupstep2"}>
-            <button
-              disabled={isNextButtonDisabled} // 필수 항목이 체크되지 않으면 비활성화
-              className={`w-full px-6 py-4 text-base font-bold text-blue-900 rounded-md ${
-                isNextButtonDisabled
-                  ? "bg-gray-200 cursor-not-allowed"
-                  : "bg-violet-200 hover:bg-violet-300"
-              }`}
+        {/* Card */}
+        <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-xl p-6 sm:p-8">
+          <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">
+            서비스 이용약관
+          </h2>
+          <p className="text-gray-500 dark:text-gray-400 mb-6">
+            매글 서비스 이용을 위해 약관에 동의해주세요
+          </p>
+
+          {/* 전체 동의 */}
+          <button
+            type="button"
+            onClick={() => handleCheck("all", !checkedItems.all)}
+            className={cn(
+              "w-full p-4 rounded-xl border-2 mb-4 flex items-center gap-3 transition-all duration-200",
+              checkedItems.all
+                ? "border-violet-500 bg-violet-50 dark:bg-violet-900/20"
+                : "border-gray-200 dark:border-gray-700 hover:border-violet-300"
+            )}
+          >
+            <div
+              className={cn(
+                "w-6 h-6 rounded-full flex items-center justify-center transition-colors",
+                checkedItems.all
+                  ? "bg-violet-500 text-white"
+                  : "bg-gray-100 dark:bg-gray-700"
+              )}
             >
-              다음 {/* 버튼 텍스트 */}
-            </button>
-          </Link>
+              {checkedItems.all && <Check className="w-4 h-4" />}
+            </div>
+            <span className="font-semibold text-gray-900 dark:text-white">
+              전체 동의하기
+            </span>
+          </button>
+
+          <div className="h-px bg-gray-100 dark:bg-gray-700 my-4" />
+
+          {/* 개별 동의 항목 */}
+          <div className="space-y-3">
+            {agreementItems.map((item) => {
+              const Icon = item.icon;
+              const isChecked = checkedItems[item.key as keyof CheckedItems];
+              const isOpen = openSections[item.key as keyof OpenSections];
+
+              return (
+                <div key={item.key}>
+                  <div
+                    className={cn(
+                      "p-4 rounded-xl border transition-all duration-200",
+                      isChecked
+                        ? "border-violet-200 bg-violet-50/50 dark:border-violet-800 dark:bg-violet-900/10"
+                        : "border-gray-100 dark:border-gray-700"
+                    )}
+                  >
+                    <div className="flex items-center justify-between">
+                      <button
+                        type="button"
+                        onClick={() =>
+                          handleCheck(
+                            item.key as keyof CheckedItems,
+                            !isChecked
+                          )
+                        }
+                        className="flex items-center gap-3 flex-1"
+                      >
+                        <div
+                          className={cn(
+                            "w-5 h-5 rounded flex items-center justify-center transition-colors",
+                            isChecked
+                              ? "bg-violet-500 text-white"
+                              : "bg-gray-100 dark:bg-gray-700"
+                          )}
+                        >
+                          {isChecked && <Check className="w-3 h-3" />}
+                        </div>
+                        <Icon className="w-4 h-4 text-gray-400" />
+                        <span className="text-sm text-gray-700 dark:text-gray-300">
+                          <span
+                            className={cn(
+                              "font-medium",
+                              item.required
+                                ? "text-violet-600 dark:text-violet-400"
+                                : "text-gray-400"
+                            )}
+                          >
+                            {item.required ? "(필수)" : "(선택)"}
+                          </span>{" "}
+                          {item.label}
+                        </span>
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() =>
+                          toggleSection(item.key as keyof OpenSections)
+                        }
+                        className="p-1 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
+                      >
+                        {isOpen ? (
+                          <ChevronUp className="w-5 h-5 text-gray-400" />
+                        ) : (
+                          <ChevronDown className="w-5 h-5 text-gray-400" />
+                        )}
+                      </button>
+                    </div>
+
+                    {isOpen && (
+                      <div className="mt-3 pt-3 border-t border-gray-100 dark:border-gray-700">
+                        <Link
+                          to="#"
+                          className="text-sm text-violet-600 dark:text-violet-400 hover:underline"
+                        >
+                          약관 전문 보기 →
+                        </Link>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+
+          {/* 다음 버튼 */}
+          <div className="mt-8">
+            <Link to={isNextButtonDisabled ? "#" : "/signupstep2"}>
+              <Button
+                variant="violet"
+                size="xl"
+                className="w-full rounded-xl font-semibold"
+                disabled={isNextButtonDisabled}
+              >
+                다음 단계로
+              </Button>
+            </Link>
+            {isNextButtonDisabled && (
+              <p className="text-center text-sm text-gray-400 mt-3">
+                필수 약관에 동의해주세요
+              </p>
+            )}
+          </div>
         </div>
       </div>
     </div>

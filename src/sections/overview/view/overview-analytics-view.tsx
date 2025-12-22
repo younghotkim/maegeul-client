@@ -17,6 +17,7 @@ import { useMoodColorData } from "../../../hooks/useMoodColorData";
 import { useDiaryCount } from "../../../hooks/queries/use-diary-queries";
 import { countEmotionAnalysisByUserId } from ".././../../api/emotionApi";
 import { DiaryTimeline } from "../../../dashboardComponents/timeline/DiaryTimeline";
+import { MoodCalendar } from "../../../dashboardComponents/calendar/MoodCalendar";
 
 // Lucide 아이콘
 import { Palette, Smile, BookOpen, Sparkles } from "lucide-react";
@@ -238,7 +239,13 @@ export function OverviewAnalyticsView() {
             </motion.div>
           </Grid>
 
-          <Grid xs={12} md={6} lg={8}>
+          <Grid xs={12} md={6} lg={4}>
+            <motion.div variants={itemVariants}>
+              <MoodCalendar />
+            </motion.div>
+          </Grid>
+
+          <Grid xs={12} md={6} lg={4}>
             <motion.div variants={itemVariants}>
               <AnalyticsNews title="추천 컨텐츠" list={_posts.slice(0, 3)} />
             </motion.div>

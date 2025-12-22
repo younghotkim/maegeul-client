@@ -1,74 +1,104 @@
-//client2/src/pages/Auth/EmailLogin.tsx
+//client/src/pages/Auth/EmailLogin.tsx
 import React from "react";
 import { Link } from "react-router-dom";
 import LoginForm from "./LoginForm";
 import MeageulLogo from "../../Icon/Brand Logo_web ver. (v.1.0) (24.09.22) 1.png";
+import { Sparkles, UserPlus, Search, KeyRound } from "lucide-react";
 
 const EmailLogin = () => {
   return (
-    <>
-      {/* 상단 광고 줄 */}
-      <div className="font-plus-jakarta-sans items-center justify-center flex w-full bg-violet-400 p-2 sm:p-3 text-xs sm:text-sm px-4">
-        <Link to="/home" className="flex-shrink-0">
-          <img src={MeageulLogo} alt="Maegeul Logo" className="w-20 sm:w-[100px]" />
-        </Link>
-        <div className="text-white font-plus-jakarta-sans ml-2 sm:ml-3">
-          꾸준히 감정일기를 작성하면 나에게 맞는 콘텐츠를 추천받을 확률이
-          높아져요!
+    <div className="min-h-screen bg-gradient-to-br from-violet-50 via-white to-purple-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900">
+      {/* 상단 배너 */}
+      <div className="bg-gradient-to-r from-violet-500 to-purple-600 py-3 px-4">
+        <div className="max-w-6xl mx-auto flex items-center justify-center gap-3">
+          <Link to="/home" className="flex-shrink-0">
+            <img src={MeageulLogo} alt="Maegeul Logo" className="h-6 sm:h-7 brightness-0 invert" />
+          </Link>
+          <div className="hidden sm:flex items-center gap-2 text-white/90 text-sm">
+            <Sparkles className="w-4 h-4" />
+            <span>꾸준히 감정일기를 작성하면 나에게 맞는 콘텐츠를 추천받을 확률이 높아져요!</span>
+          </div>
         </div>
       </div>
 
-      {/* 이메일 로그인 페이지 */}
-      <div className="font-plus-jakarta-sans min-h-screen bg-white dark:bg-gray-800 dark:text-white py-8 sm:py-12">
-        {/* 컨테이너 추가: 텍스트와 로그인 폼을 함께 감싸는 컨테이너 */}
-        <div className="container mx-auto h-full flex items-center justify-center px-4 sm:px-6 lg:px-8">
-          {/* 그리드 레이아웃 */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 sm:gap-8 w-full max-w-6xl">
-            {/* 텍스트 영역 */}
-            <div className="flex flex-col justify-center p-4 sm:p-8 text-left">
-              <h2 className="text-2xl sm:text-3xl lg:text-4xl font-extrabold mb-3 sm:mb-4 text-violet-500 dark:text-violet-400">
-                이메일 로그인하기
-              </h2>
-              <p className="text-xs sm:text-sm text-violet-950 dark:text-violet-200 leading-6 mb-6 sm:mb-10">
-                회원가입 시에 입력했던 이메일 주소와 비밀번호를 입력해 주세요.
-                <br /> 만약 이메일 주소나 비밀번호가 기억나지 않는다면 아래의
-                계정 찾기 버튼을 통해 확인 후 로그인할 수 있어요.
+      {/* 메인 컨텐츠 */}
+      <div className="flex items-center justify-center min-h-[calc(100vh-52px)] py-8 sm:py-12 px-4">
+        <div className="w-full max-w-5xl">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12 items-center">
+            {/* 왼쪽: 텍스트 영역 */}
+            <div className="order-2 lg:order-1 text-center lg:text-left">
+              <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold mb-4">
+                <span className="bg-gradient-to-r from-violet-600 to-purple-600 bg-clip-text text-transparent">
+                  다시 만나서 반가워요
+                </span>
+              </h1>
+              <p className="text-gray-600 dark:text-gray-300 text-base sm:text-lg mb-8 leading-relaxed">
+                회원가입 시 입력했던 이메일 주소와 비밀번호를 입력해 주세요.
+                <br className="hidden sm:block" />
+                계정 정보가 기억나지 않으시면 아래에서 찾을 수 있어요.
               </p>
-              <p className="text-xs sm:text-sm font-semibold text-violet-500 dark:text-violet-400 mb-4 sm:mb-10">
-                회원가입 정보가 기억나지 않는다면?
-              </p>
-              <div className="flex flex-col sm:flex-row gap-4 sm:gap-6 lg:gap-10">
+
+              {/* 링크 카드들 */}
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                 <Link
                   to="/mainsignup"
-                  className="text-slate-400 dark:text-slate-300 font-plus-jakarta-sans hover:font-bold hover:text-violet-500 dark:hover:text-violet-400 transition-colors duration-300"
+                  className="group flex items-center gap-3 p-4 rounded-xl bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700 hover:border-violet-300 dark:hover:border-violet-600 hover:shadow-lg transition-all duration-300"
                 >
-                  회원가입
+                  <div className="w-10 h-10 rounded-lg bg-violet-100 dark:bg-violet-900/30 flex items-center justify-center group-hover:bg-violet-200 dark:group-hover:bg-violet-900/50 transition-colors">
+                    <UserPlus className="w-5 h-5 text-violet-600 dark:text-violet-400" />
+                  </div>
+                  <div className="text-left">
+                    <p className="text-sm font-semibold text-gray-900 dark:text-white">회원가입</p>
+                    <p className="text-xs text-gray-500 dark:text-gray-400">새 계정 만들기</p>
+                  </div>
                 </Link>
+
                 <Link
                   to="#"
-                  className="text-slate-400 dark:text-slate-300 font-plus-jakarta-sans hover:font-bold hover:text-violet-500 dark:hover:text-violet-400 transition-colors duration-300"
+                  className="group flex items-center gap-3 p-4 rounded-xl bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700 hover:border-violet-300 dark:hover:border-violet-600 hover:shadow-lg transition-all duration-300"
                 >
-                  계정 찾기
+                  <div className="w-10 h-10 rounded-lg bg-violet-100 dark:bg-violet-900/30 flex items-center justify-center group-hover:bg-violet-200 dark:group-hover:bg-violet-900/50 transition-colors">
+                    <Search className="w-5 h-5 text-violet-600 dark:text-violet-400" />
+                  </div>
+                  <div className="text-left">
+                    <p className="text-sm font-semibold text-gray-900 dark:text-white">계정 찾기</p>
+                    <p className="text-xs text-gray-500 dark:text-gray-400">이메일 찾기</p>
+                  </div>
                 </Link>
+
                 <Link
                   to="#"
-                  className="text-slate-400 dark:text-slate-300 font-plus-jakarta-sans hover:font-bold hover:text-violet-500 dark:hover:text-violet-400 transition-colors duration-300"
+                  className="group flex items-center gap-3 p-4 rounded-xl bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-700 hover:border-violet-300 dark:hover:border-violet-600 hover:shadow-lg transition-all duration-300"
                 >
-                  비밀번호 찾기
+                  <div className="w-10 h-10 rounded-lg bg-violet-100 dark:bg-violet-900/30 flex items-center justify-center group-hover:bg-violet-200 dark:group-hover:bg-violet-900/50 transition-colors">
+                    <KeyRound className="w-5 h-5 text-violet-600 dark:text-violet-400" />
+                  </div>
+                  <div className="text-left">
+                    <p className="text-sm font-semibold text-gray-900 dark:text-white">비밀번호</p>
+                    <p className="text-xs text-gray-500 dark:text-gray-400">비밀번호 재설정</p>
+                  </div>
                 </Link>
               </div>
             </div>
 
-            {/* 로그인 폼 영역 */}
-            <div className="flex items-center justify-center">
-              <div className="w-full max-w-[463px] min-h-[400px] sm:min-h-[481px] items-center justify-center rounded-xl bg-slate-100 dark:bg-gray-900">
+            {/* 오른쪽: 로그인 폼 */}
+            <div className="order-1 lg:order-2">
+              <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-xl p-6 sm:p-8 border border-gray-100 dark:border-gray-700">
+                <div className="text-center mb-6">
+                  <h2 className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white mb-2">
+                    로그인
+                  </h2>
+                  <p className="text-sm text-gray-500 dark:text-gray-400">
+                    매글 계정으로 로그인하세요
+                  </p>
+                </div>
                 <LoginForm />
               </div>
             </div>
           </div>
         </div>
       </div>
-    </>
+    </div>
   );
 };
 

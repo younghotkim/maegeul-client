@@ -53,13 +53,21 @@ apiClient.interceptors.request.use(
     if (authStorage) {
       try {
         const parsedAuth = JSON.parse(authStorage);
+        // zustand persist v4+ 구조: { state: { ... }, version: ... }
         const token = parsedAuth.state?.token;
         if (token) {
           config.headers.Authorization = `Bearer ${token}`;
+          if (import.meta.env.DEV) {
+            console.log("🔑 토큰 설정됨:", token.substring(0, 20) + "...");
+          }
+        } else if (import.meta.env.DEV) {
+          console.log("⚠️ auth-storage에 토큰 없음:", parsedAuth);
         }
       } catch (error) {
         console.error("Failed to parse auth storage:", error);
       }
+    } else if (import.meta.env.DEV) {
+      console.log("⚠️ auth-storage가 localStorage에 없음");
     }
     return config;
   },
