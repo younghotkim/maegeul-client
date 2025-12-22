@@ -48,9 +48,18 @@ export const apiClient = axios.create({
 // Request interceptor - 토큰 추가
 apiClient.interceptors.request.use(
   (config) => {
-    const token = localStorage.getItem("token");
-    if (token) {
-      config.headers.Authorization = `Bearer ${token}`;
+    // Zustand persist storage에서 토큰 가져오기
+    const authStorage = localStorage.getItem("auth-storage");
+    if (authStorage) {
+      try {
+        const parsedAuth = JSON.parse(authStorage);
+        const token = parsedAuth.state?.token;
+        if (token) {
+          config.headers.Authorization = `Bearer ${token}`;
+        }
+      } catch (error) {
+        console.error("Failed to parse auth storage:", error);
+      }
     }
     return config;
   },
