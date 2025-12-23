@@ -1,8 +1,6 @@
 //client/src/pages/Auth/EmailLogin.tsx
-import React from "react";
 import { Link } from "react-router-dom";
 import LoginForm from "./LoginForm";
-import MeageulLogo from "../../Icon/Brand Logo_web ver. (v.1.0) (24.09.22) 1.png";
 import { Sparkles, UserPlus, Search, KeyRound } from "lucide-react";
 
 const EmailLogin = () => {
@@ -12,7 +10,7 @@ const EmailLogin = () => {
       <div className="bg-gradient-to-r from-violet-500 to-purple-600 py-3 px-4">
         <div className="max-w-6xl mx-auto flex items-center justify-center gap-3">
           <Link to="/home" className="flex-shrink-0">
-            <img src={MeageulLogo} alt="Maegeul Logo" className="h-6 sm:h-7 brightness-0 invert" />
+            <img src="/assets/main_logo.png" alt="Logo" className="h-6 sm:h-7" />
           </Link>
           <div className="hidden sm:flex items-center gap-2 text-white/90 text-sm">
             <Sparkles className="w-4 h-4" />

@@ -106,7 +106,7 @@ export function OverviewAnalyticsView() {
             fontWeight: 700,
           }}
         >
-          {user?.profile_name}님, 안녕하세요 👋
+          {user?.profile_name}님, 안녕하세요 !
         </Typography>
         <Typography
           variant="body1"

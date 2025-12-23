@@ -18,12 +18,19 @@ export interface DiaryReference {
   relevanceScore: number;
 }
 
+export interface MessageAction {
+  type: 'write_diary' | 'view_dashboard' | 'view_diary';
+  label: string;
+  path: string;
+}
+
 export interface Message {
   id: string;
   role: 'user' | 'assistant' | 'system';
   content: string;
   timestamp: Date;
   relatedDiaries?: DiaryReference[];
+  action?: MessageAction;  // CTA 버튼 액션
 }
 
 export interface ChatSession {
@@ -83,7 +90,7 @@ interface ChatState {
   // Actions - Streaming
   startStreaming: () => void;
   appendStreamingContent: (token: string) => void;
-  finishStreaming: (diaryIds?: number[]) => void;
+  finishStreaming: (diaryIds?: number[], action?: MessageAction) => void;
   handleStreamError: (error: string, partialContent?: string) => void;
 
   // Actions - Queue management
@@ -370,7 +377,7 @@ export const useChatStore = create<ChatState>((set, get) => ({
               if (parsed.token !== undefined) {
                 get().appendStreamingContent(parsed.token);
               } else if (parsed.diary_ids !== undefined) {
-                get().finishStreaming(parsed.diary_ids);
+                get().finishStreaming(parsed.diary_ids, parsed.action);
               } else if (parsed.error !== undefined) {
                 get().handleStreamError(parsed.error, parsed.partial_content);
               } else if (parsed.session_id !== undefined) {
@@ -427,7 +434,7 @@ export const useChatStore = create<ChatState>((set, get) => ({
     }));
   },
 
-  finishStreaming: (diaryIds?: number[]) => {
+  finishStreaming: (diaryIds?: number[], action?: MessageAction) => {
     const { streamingContent, processQueue } = get();
     
     // Create assistant message from streamed content
@@ -442,6 +449,7 @@ export const useChatStore = create<ChatState>((set, get) => ({
         date: '',
         relevanceScore: 0,
       })),
+      action: action,  // CTA 액션 추가
     };
 
     set(state => ({

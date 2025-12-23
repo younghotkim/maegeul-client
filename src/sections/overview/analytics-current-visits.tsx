@@ -107,7 +107,7 @@ export function AnalyticsCurrentVisits({
           options={chartOptions}
           width={{ xs: 240, xl: 260 }}
           height={{ xs: 240, xl: 260 }}
-          sx={{ my: 6, mx: "auto" }}
+          sx={{ my: 9, mx: "auto" }}
         />
       </Box>
 

@@ -4,6 +4,8 @@
  * Validates: Requirements 8.1, 8.2, 8.3
  */
 
+import type { MessageAction } from '../hooks/stores/use-chat-store';
+
 // ============================================================================
 // Types
 // ============================================================================
@@ -11,7 +13,7 @@
 export interface SSECallbacks {
   onToken: (token: string) => void;
   onSessionId: (sessionId: string) => void;
-  onDone: (diaryIds: number[]) => void;
+  onDone: (diaryIds: number[], action?: MessageAction) => void;
   onError: (error: string, partialContent?: string) => void;
 }
 
@@ -38,6 +40,7 @@ export interface SSETokenEvent {
 export interface SSEDoneEvent {
   message_id: string;
   diary_ids: number[];
+  action?: MessageAction;
 }
 
 export interface SSEErrorEvent {
@@ -184,7 +187,7 @@ export class ChatSSEHandler {
           break;
 
         case 'done':
-          this.callbacks.onDone(parsed.diary_ids || []);
+          this.callbacks.onDone(parsed.diary_ids || [], parsed.action);
           break;
 
         case 'error':
@@ -196,7 +199,7 @@ export class ChatSSEHandler {
           if (parsed.token !== undefined) {
             this.callbacks.onToken(parsed.token);
           } else if (parsed.diary_ids !== undefined) {
-            this.callbacks.onDone(parsed.diary_ids);
+            this.callbacks.onDone(parsed.diary_ids, parsed.action);
           } else if (parsed.error !== undefined) {
             this.callbacks.onError(parsed.error, parsed.partial_content);
           } else if (parsed.session_id !== undefined) {
