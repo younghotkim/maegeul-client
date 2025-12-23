@@ -318,12 +318,12 @@ export const useChatStore = create<ChatState>((set, get) => ({
         }
       }
 
-      // Create EventSource for SSE
+      // Create URL for SSE - VITE_API_URL already includes /api
       const baseUrl = import.meta.env.VITE_API_URL || '';
-      const url = new URL(`${baseUrl}/chat/message`);
+      const url = `${baseUrl}/chat/message`;
       
       // Use fetch with POST for SSE (EventSource only supports GET)
-      const response = await fetch(url.toString(), {
+      const response = await fetch(url, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
