@@ -23,6 +23,10 @@ import { DiaryStreak } from "../../../dashboardComponents/streak/DiaryStreak";
 import { EmotionInsights } from "../../../dashboardComponents/insights/EmotionInsights";
 import { MoodRecommendations } from "../../../dashboardComponents/recommendations/MoodRecommendations";
 
+// Chat components
+import { ChatWidget } from "../../../components/chat/ChatWidget";
+import { ChatPanel } from "../../../components/chat/ChatPanel";
+
 // Lucide 아이콘
 import { Palette, Smile, BookOpen, Sparkles } from "lucide-react";
 
@@ -56,6 +60,7 @@ export function OverviewAnalyticsView() {
   const { data: diaryCount = 0 } = useDiaryCount(user?.user_id);
 
   const [emotionCount, setEmotionCount] = useState<number>(0);
+  const [isChatOpen, setIsChatOpen] = useState<boolean>(false);
 
   useEffect(() => {
     const fetchEmotionAnalysisCount = async (user_id: number) => {
@@ -73,6 +78,14 @@ export function OverviewAnalyticsView() {
   }, [user?.user_id]);
 
   const { moodColorData, totalLabels, greenYellowTotal } = useMoodColorData();
+
+  const handleChatToggle = () => {
+    setIsChatOpen((prev) => !prev);
+  };
+
+  const handleChatClose = () => {
+    setIsChatOpen(false);
+  };
 
   return (
     <DashboardContent maxWidth="xl">
@@ -298,6 +311,18 @@ export function OverviewAnalyticsView() {
 
         </Grid>
       </motion.div>
+
+      {/* Mudita Bot Chat Widget - Floating button (bottom-right) */}
+      <ChatWidget 
+        onOpen={handleChatToggle} 
+        isOpen={isChatOpen}
+      />
+
+      {/* Mudita Bot Chat Panel - Slide-out panel */}
+      <ChatPanel 
+        isOpen={isChatOpen} 
+        onClose={handleChatClose} 
+      />
     </DashboardContent>
   );
 }

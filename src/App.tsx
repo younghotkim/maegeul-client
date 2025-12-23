@@ -1,11 +1,14 @@
-import React, { useEffect, lazy, Suspense } from "react";
+import React, { useEffect, lazy, Suspense, useState } from "react";
 import { BrowserRouter as Router, Route, Routes } from "react-router-dom";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 import { queryClient } from "./lib/query-client";
 import { useThemeStore } from "./hooks/stores/use-theme-store";
+import { useAuthStore } from "./hooks/stores/use-auth-store";
 import { HelmetProvider } from "react-helmet-async";
 import { DashboardWrapper } from "./layouts/DashboardWrapper";
+import { ChatWidget } from "./components/chat/ChatWidget";
+import { ChatPanel } from "./components/chat/ChatPanel";
 // Context Provider 제거 - Store 사용으로 전환
 
 // Eager loading for critical pages
@@ -56,52 +59,71 @@ function ThemeSync() {
 
 // App content wrapper
 function AppContent() {
-  return (
-    <Suspense fallback={<LoadingFallback />}>
-      <Routes>
-        {/* 메인 앱 라우트 (Material-UI 없음) */}
-        <Route path="/" element={<Home />} />
-        <Route path="/home" element={<Home />} />
-        <Route path="/maegeul" element={<MaeGeul />} />
-        <Route path="/mgwriting" element={<MgWriting />} />
-        <Route path="/login/success" element={<LoginSuccess />} />
-        <Route path="/email-login" element={<EmailLogin />} />
-        <Route path="/mypage" element={<Mypage />} />
-        <Route path="/mainlogin" element={<MainLogin />} />
-        <Route path="/mainsignup" element={<MainSignup />} />
-        <Route path="/kakao/callback" element={<KakaoCallback />} />
-        <Route path="/signupstep1" element={<SignupForm />} />
-        <Route path="/signupstep2" element={<SignupForm2 />} />
-        <Route path="/signupstep3" element={<SignupForm3 />} />
-        <Route path="/logout" element={<Logout />} />
+  const [isChatOpen, setIsChatOpen] = useState(false);
+  const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
 
-        {/* Dashboard 라우트 (Material-UI ThemeProvider 적용) */}
-        <Route
-          path="/dashboard"
-          element={
-            <DashboardWrapper>
-              <Dashboard />
-            </DashboardWrapper>
-          }
-        />
-        <Route
-          path="/contents"
-          element={
-            <DashboardWrapper>
-              <Blog />
-            </DashboardWrapper>
-          }
-        />
-        <Route
-          path="/diary"
-          element={
-            <DashboardWrapper>
-              <User />
-            </DashboardWrapper>
-          }
-        />
-      </Routes>
-    </Suspense>
+  return (
+    <>
+      <Suspense fallback={<LoadingFallback />}>
+        <Routes>
+          {/* 메인 앱 라우트 (Material-UI 없음) */}
+          <Route path="/" element={<Home />} />
+          <Route path="/home" element={<Home />} />
+          <Route path="/maegeul" element={<MaeGeul />} />
+          <Route path="/mgwriting" element={<MgWriting />} />
+          <Route path="/login/success" element={<LoginSuccess />} />
+          <Route path="/email-login" element={<EmailLogin />} />
+          <Route path="/mypage" element={<Mypage />} />
+          <Route path="/mainlogin" element={<MainLogin />} />
+          <Route path="/mainsignup" element={<MainSignup />} />
+          <Route path="/kakao/callback" element={<KakaoCallback />} />
+          <Route path="/signupstep1" element={<SignupForm />} />
+          <Route path="/signupstep2" element={<SignupForm2 />} />
+          <Route path="/signupstep3" element={<SignupForm3 />} />
+          <Route path="/logout" element={<Logout />} />
+
+          {/* Dashboard 라우트 (Material-UI ThemeProvider 적용) */}
+          <Route
+            path="/dashboard"
+            element={
+              <DashboardWrapper>
+                <Dashboard />
+              </DashboardWrapper>
+            }
+          />
+          <Route
+            path="/contents"
+            element={
+              <DashboardWrapper>
+                <Blog />
+              </DashboardWrapper>
+            }
+          />
+          <Route
+            path="/diary"
+            element={
+              <DashboardWrapper>
+                <User />
+              </DashboardWrapper>
+            }
+          />
+        </Routes>
+      </Suspense>
+
+      {/* Global Chat Widget - only show when authenticated */}
+      {isAuthenticated && (
+        <>
+          <ChatWidget 
+            onOpen={() => setIsChatOpen(true)} 
+            isOpen={isChatOpen}
+          />
+          <ChatPanel 
+            isOpen={isChatOpen} 
+            onClose={() => setIsChatOpen(false)} 
+          />
+        </>
+      )}
+    </>
   );
 }
 

@@ -161,7 +161,7 @@ export function DiaryEditorPanel({
                 {isValid ? (
                   <>
                     <Sparkles className="w-4 h-4" />
-                    <span className="hidden sm:inline">AI 분석 받기</span>
+                    <span className="hidden sm:inline">일기 저장</span>
                     <span className="sm:hidden">완료</span>
                   </>
                 ) : (
