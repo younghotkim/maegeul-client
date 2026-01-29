@@ -4,7 +4,8 @@
  * Validates: Requirements 1.1
  */
 
-import { useState, useEffect } from 'react';
+import { useMemo } from 'react';
+import { useMoodColorCounts, useMoodColors } from './queries';
 
 export interface RecentMoodData {
   recentColor: string | null;
@@ -46,91 +47,69 @@ export const moodEmojis: Record<string, string> = {
 };
 
 export function useRecentMood(userId?: number): RecentMoodData {
-  const [data, setData] = useState<RecentMoodData>({
-    recentColor: null,
-    recentLabel: null,
-    dominantColor: null,
-    moodCounts: { blue: 0, yellow: 0, green: 0, red: 0 },
-    totalEntries: 0,
-    isLoading: false,
-    error: null,
-  });
+  const { 
+    data: colorCountData, 
+    isLoading: isLoadingCounts, 
+    error: countsError 
+  } = useMoodColorCounts(userId);
+  
+  const { 
+    data: moodColorsData, 
+    isLoading: isLoadingColors, 
+    error: colorsError 
+  } = useMoodColors(userId);
 
-  useEffect(() => {
-    if (!userId) return;
+  const result = useMemo(() => {
+    // Parse color counts
+    const moodCounts = { blue: 0, yellow: 0, green: 0, red: 0 };
+    let totalEntries = 0;
 
-    const fetchRecentMood = async () => {
-      setData(prev => ({ ...prev, isLoading: true, error: null }));
-
-      try {
-        // Dynamic import to avoid loading apiClient during tests
-        const { apiClient } = await import('../lib/api-client');
-        
-        // Fetch mood color counts
-        const colorResponse = await apiClient.get(`/moodmeter/colorcount/${userId}`);
-        const colorData = colorResponse.data;
-
-        // Parse color counts
-        const moodCounts = { blue: 0, yellow: 0, green: 0, red: 0 };
-        let totalEntries = 0;
-
-        colorData.forEach((item: { color: string; count: number }) => {
-          const englishColor = colorMap[item.color];
-          if (englishColor && englishColor in moodCounts) {
-            moodCounts[englishColor as keyof typeof moodCounts] = item.count;
-            totalEntries += item.count;
-          }
-        });
-
-        // Find dominant color
-        let dominantColor: string | null = null;
-        let maxCount = 0;
-        Object.entries(moodCounts).forEach(([color, count]) => {
-          if (count > maxCount) {
-            maxCount = count;
-            dominantColor = color;
-          }
-        });
-
-        // Try to fetch most recent mood entry
-        let recentColor: string | null = null;
-        let recentLabel: string | null = null;
-
-        try {
-          const recentResponse = await apiClient.get(`/moodmeter/color/${userId}`);
-          if (recentResponse.data && recentResponse.data.length > 0) {
-            const mostRecent = recentResponse.data[0];
-            recentColor = colorMap[mostRecent.color] || mostRecent.color;
-            recentLabel = mostRecent.label;
-          }
-        } catch (e) {
-          // Recent mood fetch failed, use dominant color
-          recentColor = dominantColor;
+    if (colorCountData) {
+      colorCountData.forEach((item) => {
+        const englishColor = colorMap[item.color];
+        if (englishColor && englishColor in moodCounts) {
+          moodCounts[englishColor as keyof typeof moodCounts] = item.count;
+          totalEntries += item.count;
         }
+      });
+    }
 
-        setData({
-          recentColor,
-          recentLabel,
-          dominantColor,
-          moodCounts,
-          totalEntries,
-          isLoading: false,
-          error: null,
-        });
-      } catch (error: any) {
-        console.error('Failed to fetch recent mood:', error);
-        setData(prev => ({
-          ...prev,
-          isLoading: false,
-          error: error.message || 'Failed to fetch mood data',
-        }));
+    // Find dominant color
+    let dominantColor: string | null = null;
+    let maxCount = 0;
+    Object.entries(moodCounts).forEach(([color, count]) => {
+      if (count > maxCount) {
+        maxCount = count;
+        dominantColor = color;
       }
+    });
+
+    // Get most recent mood entry
+    let recentColor: string | null = null;
+    let recentLabel: string | null = null;
+
+    if (moodColorsData && moodColorsData.length > 0) {
+      const mostRecent = moodColorsData[0];
+      recentColor = colorMap[mostRecent.color] || mostRecent.color;
+      recentLabel = mostRecent.label;
+    } else {
+      recentColor = dominantColor;
+    }
+
+    return {
+      recentColor,
+      recentLabel,
+      dominantColor,
+      moodCounts,
+      totalEntries,
     };
+  }, [colorCountData, moodColorsData]);
 
-    fetchRecentMood();
-  }, [userId]);
-
-  return data;
+  return {
+    ...result,
+    isLoading: isLoadingCounts || isLoadingColors,
+    error: countsError?.message || colorsError?.message || null,
+  };
 }
 
 /**

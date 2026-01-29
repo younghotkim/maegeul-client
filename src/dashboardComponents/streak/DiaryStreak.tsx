@@ -1,4 +1,4 @@
-import { useEffect, useState, useMemo } from "react";
+import { useMemo } from "react";
 import Card from "@mui/material/Card";
 import CardContent from "@mui/material/CardContent";
 import Box from "@mui/material/Box";
@@ -10,12 +10,7 @@ import { motion } from "framer-motion";
 import dayjs from "dayjs";
 
 import { useAuthStore } from "../../hooks/stores/use-auth-store";
-import { apiClient } from "../../lib/api-client";
-
-interface Diary {
-  diary_id: number;
-  date: string;
-}
+import { useDiaries } from "../../hooks/queries";
 
 // 마일스톤 정의
 const milestones = [
@@ -27,31 +22,16 @@ const milestones = [
 
 export function DiaryStreak() {
   const theme = useTheme();
-  const [diaryData, setDiaryData] = useState<Diary[]>([]);
   const user = useAuthStore((state) => state.user);
-
-  useEffect(() => {
-    const fetchData = async () => {
-      if (!user?.user_id) return;
-      try {
-        const response = await apiClient.get(`/diary/${user.user_id}`);
-        if (Array.isArray(response.data)) {
-          setDiaryData(response.data);
-        }
-      } catch (error) {
-        console.error("다이어리 데이터 로드 실패:", error);
-      }
-    };
-    fetchData();
-  }, [user?.user_id]);
+  const { data: diaryData = [] } = useDiaries(user?.user_id);
 
   // 연속 기록 일수 계산
   const streakData = useMemo(() => {
     if (diaryData.length === 0) return { current: 0, longest: 0, total: 0 };
 
-    // 날짜별로 그룹화
+    // 날짜별로 그룹화 - formatted_date 사용
     const dateSet = new Set(
-      diaryData.map((d) => dayjs(d.date).format("YYYY-MM-DD"))
+      diaryData.map((d) => dayjs(d.formatted_date).format("YYYY-MM-DD"))
     );
     const sortedDates = Array.from(dateSet).sort();
 

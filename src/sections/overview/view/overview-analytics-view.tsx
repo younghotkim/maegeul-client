@@ -12,10 +12,9 @@ import { AnalyticsWidgetSummary } from "../analytics-widget-summary";
 import { useAuthStore } from "../../../hooks/stores/use-auth-store";
 import AnalyticsWordCloud from "../../../dashboardComponents/wordcloud/AnalyticsWordCloud";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useMoodColorData } from "../../../hooks/useMoodColorData";
-import { useDiaryCount } from "../../../hooks/queries/use-diary-queries";
-import { countEmotionAnalysisByUserId } from ".././../../api/emotionApi";
+import { useDiaryCount, useEmotionCount } from "../../../hooks/queries";
 import { DiaryTimeline } from "../../../dashboardComponents/timeline/DiaryTimeline";
 import { MoodCalendar } from "../../../dashboardComponents/calendar/MoodCalendar";
 import { EmotionTrendChart } from "../../../dashboardComponents/emotion-trend/EmotionTrendChart";
@@ -58,24 +57,9 @@ const itemVariants = {
 export function OverviewAnalyticsView() {
   const user = useAuthStore((state) => state.user);
   const { data: diaryCount = 0 } = useDiaryCount(user?.user_id);
+  const { data: emotionCount = 0 } = useEmotionCount(user?.user_id);
 
-  const [emotionCount, setEmotionCount] = useState<number>(0);
   const [isChatOpen, setIsChatOpen] = useState<boolean>(false);
-
-  useEffect(() => {
-    const fetchEmotionAnalysisCount = async (user_id: number) => {
-      try {
-        const count = await countEmotionAnalysisByUserId(user_id);
-        setEmotionCount(count);
-      } catch (error) {
-        console.error("감정 분석 횟수를 불러오는 중 오류 발생:", error);
-      }
-    };
-
-    if (user?.user_id) {
-      fetchEmotionAnalysisCount(user.user_id);
-    }
-  }, [user?.user_id]);
 
   const { moodColorData, totalLabels, greenYellowTotal } = useMoodColorData();
 

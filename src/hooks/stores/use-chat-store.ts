@@ -6,6 +6,7 @@
 
 import { create } from 'zustand';
 import { apiClient } from '../../lib/api-client';
+import { createChatSSEHandler, type ChatSSEHandler } from '../../lib/sse-handler';
 
 // ============================================================================
 // Interfaces
@@ -68,6 +69,9 @@ interface ChatState {
   isTyping: boolean;
   streamingContent: string;
 
+  // SSE handler instance
+  sseHandler: ChatSSEHandler | null;
+
   // Message queue (for messages sent during streaming)
   messageQueue: QueuedMessage[];
 
@@ -86,6 +90,7 @@ interface ChatState {
   sendMessage: (content: string) => Promise<void>;
   addMessage: (message: Message) => void;
   clearMessages: () => void;
+  abortMessage: () => void;
 
   // Actions - Streaming
   startStreaming: () => void;
@@ -175,6 +180,7 @@ export const useChatStore = create<ChatState>((set, get) => ({
   isStreaming: false,
   isTyping: false,
   streamingContent: '',
+  sseHandler: null,
   messageQueue: [],
   error: null,
 
@@ -312,96 +318,38 @@ export const useChatStore = create<ChatState>((set, get) => ({
     // Start streaming state
     startStreaming();
 
-    try {
-      // Get auth token from localStorage
-      const authStorage = localStorage.getItem('auth-storage');
-      let token = '';
-      if (authStorage) {
-        try {
-          const parsed = JSON.parse(authStorage);
-          token = parsed.state?.token || '';
-        } catch (e) {
-          console.error('Failed to parse auth storage:', e);
-        }
-      }
-
-      // Create URL for SSE - VITE_API_URL already includes /api
-      const baseUrl = import.meta.env.VITE_API_URL || '';
-      const url = `${baseUrl}/chat/message`;
-      
-      // Use fetch with POST for SSE (EventSource only supports GET)
-      const response = await fetch(url, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`,
-        },
-        body: JSON.stringify({
-          message: content,
-          session_id: currentSession?.session_id,
-        }),
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error || 'Failed to send message');
-      }
-
-      if (!response.body) {
-        throw new Error('No response body');
-      }
-
-      // Read SSE stream
-      const reader = response.body.getReader();
-      const decoder = new TextDecoder();
-      let buffer = '';
-
-      while (true) {
-        const { done, value } = await reader.read();
-        if (done) break;
-
-        buffer += decoder.decode(value, { stream: true });
-        const lines = buffer.split('\n');
-        buffer = lines.pop() || '';
-
-        for (const line of lines) {
-          if (line.startsWith('event: ')) {
-            const eventType = line.slice(7);
-            continue;
-          }
-          if (line.startsWith('data: ')) {
-            const data = line.slice(6);
-            try {
-              const parsed = JSON.parse(data);
-              
-              if (parsed.token !== undefined) {
-                get().appendStreamingContent(parsed.token);
-              } else if (parsed.diary_ids !== undefined) {
-                get().finishStreaming(parsed.diary_ids, parsed.action);
-              } else if (parsed.error !== undefined) {
-                get().handleStreamError(parsed.error, parsed.partial_content);
-              } else if (parsed.session_id !== undefined) {
-                // Session info received, update if needed
-                if (!currentSession) {
-                  set(state => ({
-                    currentSession: {
-                      ...state.currentSession,
-                      session_id: parsed.session_id,
-                    } as ChatSession
-                  }));
-                }
-              }
-            } catch (e) {
-              // Ignore parse errors for non-JSON data
+    // Create or reuse SSE handler
+    let handler = get().sseHandler;
+    if (!handler) {
+      handler = createChatSSEHandler(
+        {
+          onToken: (token) => get().appendStreamingContent(token),
+          onSessionId: (sessionId) => {
+            const session = get().currentSession;
+            if (!session) {
+              set({
+                currentSession: {
+                  session_id: sessionId,
+                  user_id: 0,
+                  created_at: new Date(),
+                  updated_at: new Date(),
+                  is_active: true,
+                } as ChatSession
+              });
             }
-          }
-        }
-      }
-
-    } catch (error: any) {
-      console.error('Send message error:', error);
-      get().handleStreamError(error.message || 'Failed to send message');
+            handler?.setSessionId(sessionId);
+          },
+          onDone: (diaryIds, action) => get().finishStreaming(diaryIds, action),
+          onError: (error, partialContent) => get().handleStreamError(error, partialContent),
+        },
+        currentSession?.session_id
+      );
+      set({ sseHandler: handler });
+    } else if (currentSession?.session_id) {
+      handler.setSessionId(currentSession.session_id);
     }
+
+    await handler.sendMessage(content);
   },
 
   addMessage: (message: Message) => {
@@ -412,6 +360,18 @@ export const useChatStore = create<ChatState>((set, get) => ({
 
   clearMessages: () => {
     set({ messages: [] });
+  },
+
+  abortMessage: () => {
+    const handler = get().sseHandler;
+    if (handler) {
+      handler.abort();
+    }
+    set({
+      isStreaming: false,
+      isTyping: false,
+      streamingContent: '',
+    });
   },
 
   // ============================================================================
@@ -538,6 +498,12 @@ export const useChatStore = create<ChatState>((set, get) => ({
   // ============================================================================
 
   reset: () => {
+    // Abort any ongoing SSE request
+    const handler = get().sseHandler;
+    if (handler) {
+      handler.abort();
+    }
+    
     set({
       currentSession: null,
       sessions: [],
@@ -547,6 +513,7 @@ export const useChatStore = create<ChatState>((set, get) => ({
       isStreaming: false,
       isTyping: false,
       streamingContent: '',
+      sseHandler: null,
       messageQueue: [],
       error: null,
     });

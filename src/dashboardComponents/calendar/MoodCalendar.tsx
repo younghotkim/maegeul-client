@@ -1,4 +1,4 @@
-import { useEffect, useState, useMemo } from "react";
+import { useState, useMemo } from "react";
 import Box from "@mui/material/Box";
 import Card from "@mui/material/Card";
 import CardHeader from "@mui/material/CardHeader";
@@ -12,20 +12,9 @@ import { motion, AnimatePresence } from "framer-motion";
 import dayjs from "dayjs";
 import "dayjs/locale/ko";
 import { useAuthStore } from "../../hooks/stores/use-auth-store";
-import { apiClient } from "../../lib/api-client";
+import { useDiaries } from "../../hooks/queries";
 
 dayjs.locale("ko");
-
-// Diary 타입 정의 (DiaryTimeline과 동일)
-interface Diary {
-  diary_id: number;
-  user_id: number;
-  title: string;
-  content: string;
-  date: string;
-  formatted_date: string;
-  color: string;
-}
 
 // 색상 변환 맵 (DiaryTimeline과 동일)
 const colorMap: { [key: string]: string } = {
@@ -46,44 +35,20 @@ const WEEKDAYS = ["일", "월", "화", "수", "목", "금", "토"];
 
 export function MoodCalendar() {
   const theme = useTheme();
-  const [diaryData, setDiaryData] = useState<Diary[]>([]);
   const [currentDate, setCurrentDate] = useState(dayjs());
   const [direction, setDirection] = useState(0);
   const user = useAuthStore((state) => state.user);
-
-  // DiaryTimeline과 동일한 방식으로 데이터 fetch
-  useEffect(() => {
-    const fetchDiaryData = async () => {
-      if (!user?.user_id) return;
-      try {
-        const response = await apiClient.get(`/diary/${user.user_id}`);
-        const data = response.data;
-        if (Array.isArray(data)) {
-          console.log("📅 캘린더 다이어리 데이터:", data);
-          setDiaryData(data);
-        } else {
-          console.error("다이어리 데이터가 배열이 아닙니다:", data);
-          setDiaryData([]);
-        }
-      } catch (error) {
-        console.error("다이어리 데이터를 가져오는 중 오류:", error);
-        setDiaryData([]);
-      }
-    };
-    fetchDiaryData();
-  }, [user?.user_id]);
+  const { data: diaryData = [] } = useDiaries(user?.user_id);
 
   // 날짜별 다이어리 맵 생성
   const diaryByDate = useMemo(() => {
-    const map = new Map<string, Diary[]>();
+    const map = new Map<string, typeof diaryData>();
     diaryData.forEach((diary) => {
-      // date 필드에서 날짜 추출 (ISO 형식 또는 다양한 형식 지원)
-      const dateKey = dayjs(diary.date).format("YYYY-MM-DD");
-      console.log(`📆 diary_id: ${diary.diary_id}, date: ${diary.date}, dateKey: ${dateKey}, color: ${diary.color}`);
+      // formatted_date 필드에서 날짜 추출
+      const dateKey = dayjs(diary.formatted_date).format("YYYY-MM-DD");
       const existing = map.get(dateKey) || [];
       map.set(dateKey, [...existing, diary]);
     });
-    console.log("📅 날짜별 다이어리 맵:", Object.fromEntries(map));
     return map;
   }, [diaryData]);
 
@@ -108,7 +73,7 @@ export function MoodCalendar() {
   }, [currentDate]);
 
   // 특정 날짜의 다이어리 찾기
-  const getDiariesForDay = (date: dayjs.Dayjs): Diary[] => {
+  const getDiariesForDay = (date: dayjs.Dayjs) => {
     const dateKey = date.format("YYYY-MM-DD");
     return diaryByDate.get(dateKey) || [];
   };

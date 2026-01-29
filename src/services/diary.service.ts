@@ -6,7 +6,8 @@ export interface Diary {
   title: string
   content: string
   color: string
-  formatted_date: string
+  date?: string  // ISO date string
+  formatted_date: string  // 포맷된 날짜 문자열
 }
 
 export interface CreateDiaryDto {
