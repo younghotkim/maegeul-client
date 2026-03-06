@@ -9,6 +9,8 @@ export default defineConfig({
     alias: {
       "@": path.resolve(__dirname, "./src"),
     },
+    // Avoid duplicated React instances across split chunks/libraries.
+    dedupe: ["react", "react-dom"],
   },
   server: {
     port: 3000,
@@ -31,11 +33,11 @@ export default defineConfig({
               id.includes('node_modules/@tanstack/')) {
             return 'state-vendor';
           }
-          // 차트 라이브러리 (Dashboard용)
-          if (id.includes('node_modules/apexcharts/') || 
-              id.includes('node_modules/react-apexcharts/')) {
-            return 'chart-vendor';
-          }
+          // NOTE:
+          // react-apexcharts is distributed as a UMD/CJS build and can fail in
+          // production when forcibly isolated into a manual chunk
+          // (e.g. "Cannot read properties of undefined (reading 'Component')").
+          // Let Vite/Rollup place it automatically.
           // Material UI (Dashboard용)
           if (id.includes('node_modules/@mui/') || 
               id.includes('node_modules/@emotion/')) {
@@ -53,5 +55,4 @@ export default defineConfig({
   // 환경 변수 접두사 설정
   envPrefix: "VITE_",
 });
-
 
